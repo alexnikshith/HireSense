@@ -4,6 +4,7 @@ Uses spaCy to extract skills, education, experience, and entities.
 """
 import re
 import spacy
+import spacy.cli
 from typing import Optional
 
 # ---------------------------------------------------------------------------
@@ -91,11 +92,24 @@ class NLPEngine:
 
     def _get_nlp(self):
         if self._nlp is None:
+            # Stage 1: Try standard load
             try:
                 self._nlp = spacy.load("en_core_web_sm")
-            except OSError:
-                # Fallback: blank English model
-                self._nlp = spacy.blank("en")
+            except Exception:
+                # Stage 2: Try loading by importing (works for .whl installs)
+                try:
+                    import en_core_web_sm
+                    self._nlp = en_core_web_sm.load()
+                except Exception:
+                    # Stage 3: Auto-download (Last resort for cloud environments)
+                    try:
+                        print("Downloading spaCy model on the fly...")
+                        spacy.cli.download("en_core_web_sm")
+                        self._nlp = spacy.load("en_core_web_sm")
+                    except Exception as e:
+                        # Final Fallback: Basic English logic
+                        print(f"Model download failed: {e}. Using blank model.")
+                        self._nlp = spacy.blank("en")
         return self._nlp
 
     # ------------------------------------------------------------------ #
