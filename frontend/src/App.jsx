@@ -4,7 +4,7 @@ import './index.css';
 import UploadSection from './components/UploadSection';
 import Dashboard from './components/Dashboard';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:8000');
 
 const LOADING_STEPS = [
   { id: 1, label: '📄 Parsing PDF resume…' },
