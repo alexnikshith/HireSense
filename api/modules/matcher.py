@@ -12,6 +12,7 @@ class JobMatcher:
     """Computes similarity between resume and job description."""
 
     def __init__(self):
+        # Pre-initialize vectorizer for speed
         self._vectorizer = TfidfVectorizer(
             ngram_range=(1, 3),
             stop_words="english",

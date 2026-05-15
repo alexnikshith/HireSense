@@ -8,6 +8,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
+# Absolute imports for Vercel stability
 try:
     from modules.parser import ResumeParser
     from modules.nlp_engine import NLPEngine
@@ -16,7 +17,6 @@ try:
     from modules.suggestions import SuggestionEngine
 except Exception as e:
     print(f"IMPORT ERROR: {str(e)}")
-    # We define dummy classes so the app can at least start and show the error
     class Dummy: 
         def __getattr__(self, name): 
             raise Exception(f"Backend failed to initialize. Error: {str(e)}")
@@ -42,7 +42,7 @@ suggester = SuggestionEngine()
 @app.get("/api/health")
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "version": "1.1.0"}
+    return {"status": "healthy", "version": "1.2.0"}
 
 @app.post("/api/analyze")
 @app.post("/analyze")
@@ -62,14 +62,17 @@ async def analyze_resume(
         analysis = nlp.analyze(resume_data["text"], resume_data["sections"])
 
         # 3. Job Matching
-        match_results = matcher.calculate_match(resume_data["text"], job_description)
+        match_results = matcher.match(
+            resume_data["text"], 
+            job_description,
+            analysis["skills"]
+        )
 
         # 4. ATS Scoring
-        scores = scorer.calculate_ats_score(
+        scores = scorer.score(
             resume_data, 
             analysis, 
-            match_results,
-            job_description
+            match_results
         )
 
         # 5. Generate Suggestions
@@ -81,14 +84,15 @@ async def analyze_resume(
         )
 
         return {
-            "score": scores["total_score"],
+            "score": scores["overall_score"],
             "dimensions": scores["dimensions"],
-            "match_percentage": match_results["score"],
-            "keywords_found": match_results["common_keywords"],
+            "match_percentage": match_results["match_score"],
+            "keywords_found": match_results["matching_keywords"],
             "missing_keywords": match_results["missing_keywords"],
             "analysis": analysis,
             "suggestions": suggestions,
-            "formatting_feedback": resume_data["formatting_issues"]
+            "formatting_feedback": scores["formatting_issues"],
+            "section_feedback": scores["section_feedback"]
         }
     except Exception as e:
         import traceback
@@ -96,7 +100,7 @@ async def analyze_resume(
         print(error_details)
         raise HTTPException(
             status_code=500, 
-            detail=f"AI Engine Error: {str(e)}\n\nTraceback:\n{error_details}"
+            detail=f"Analysis Error: {str(e)}"
         )
 
 if __name__ == "__main__":
