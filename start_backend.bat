@@ -1,8 +1,0 @@
-@echo off
-echo ==========================================
-echo   Resume Intelligence System - Backend
-echo ==========================================
-cd /d "%~dp0backend"
-echo Starting FastAPI server on http://localhost:8000
-python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
-pause
