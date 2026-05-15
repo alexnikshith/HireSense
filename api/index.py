@@ -85,8 +85,12 @@ async def analyze_resume(
         }
     except Exception as e:
         import traceback
-        print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=str(e))
+        error_details = traceback.format_exc()
+        print(error_details)
+        raise HTTPException(
+            status_code=500, 
+            detail=f"AI Engine Error: {str(e)}\n\nTraceback:\n{error_details}"
+        )
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
