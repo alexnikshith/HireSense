@@ -5,8 +5,7 @@ import UploadSection from './components/UploadSection';
 import Dashboard from './components/Dashboard';
 
 const API_BASE = import.meta.env.VITE_API_URL || 
-  (window.location.hostname.includes('vercel.app') ? '/api' : 
-  (window.location.port === '3000' || window.location.port === '5173' ? 'http://localhost:8000' : '/_/backend'));
+  (import.meta.env.PROD ? '/api' : 'http://localhost:8000');
 
 const LOADING_STEPS = [
   { id: 1, label: '📄 Parsing PDF resume…' },
