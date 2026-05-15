@@ -8,12 +8,19 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-# Absolute imports for Vercel stability
-from modules.parser import ResumeParser
-from modules.nlp_engine import NLPEngine
-from modules.matcher import JobMatcher
-from modules.scorer import ATSScorer
-from modules.suggestions import SuggestionEngine
+try:
+    from modules.parser import ResumeParser
+    from modules.nlp_engine import NLPEngine
+    from modules.matcher import JobMatcher
+    from modules.scorer import ATSScorer
+    from modules.suggestions import SuggestionEngine
+except Exception as e:
+    print(f"IMPORT ERROR: {str(e)}")
+    # We define dummy classes so the app can at least start and show the error
+    class Dummy: 
+        def __getattr__(self, name): 
+            raise Exception(f"Backend failed to initialize. Error: {str(e)}")
+    ResumeParser = NLPEngine = JobMatcher = ATSScorer = SuggestionEngine = Dummy
 
 app = FastAPI(title="HireSense AI API")
 
