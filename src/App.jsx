@@ -38,7 +38,7 @@ export default function App() {
 
     try {
       const formData = new FormData();
-      formData.append('resume', file);
+      formData.append('file', file);
       formData.append('job_description', jobDescription);
 
       const response = await axios.post(`${API_BASE}/analyze`, formData, {
