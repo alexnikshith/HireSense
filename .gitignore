@@ -1,0 +1,22 @@
+# Node
+node_modules/
+dist/
+.env
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+.pytest_cache/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Startup scripts
+*.bat
