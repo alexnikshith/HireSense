@@ -45,3 +45,15 @@ pip install -r requirements.txt
 uvicorn api.index:app --reload --port 8000
 ```
 The API will be available at `http://localhost:8000`.
+
+### 2. Frontend Setup
+```bash
+cd web
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+The application will be available at `http://localhost:3000`.
