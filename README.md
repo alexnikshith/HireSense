@@ -18,3 +18,10 @@ Using a combination of **FastAPI**, **NLP (spaCy)**, and **Next.js 14**, HireSen
 - **NLP**: Custom engine using spaCy & Scikit-learn
 - **PDF Parsing**: pdfminer.six
 - **API**: RESTful architecture
+
+## 🏗️ Architecture
+
+HireSense follows a modern monorepo-style architecture:
+- **`/web`**: Next.js 14 frontend handling the user interface and analytics visualization.
+- **`/api`**: FastAPI backend exposing the core NLP and analysis endpoints.
+- **`/api/modules`**: Modular Python engines for parsing, matching, and scoring.
