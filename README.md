@@ -4,6 +4,11 @@ HireSense is a premium AI-powered SaaS platform designed to help candidates opti
 
 Using a combination of **FastAPI**, **NLP (spaCy)**, and **Next.js 14**, HireSense provides recruiter-level insights, skill gap analysis, and smart suggestions in a beautiful, minimalist dashboard.
 
+## 📸 Preview
+
+*SaaS Landing Page and Intelligence Dashboard*
+*(Screenshots coming soon)*
+
 ## 🛠️ Tech Stack
 
 ### Frontend
