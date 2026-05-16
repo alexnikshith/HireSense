@@ -78,3 +78,10 @@ The application will be available at `http://localhost:3000`.
 - [ ] Real-time interview simulation based on resume gaps
 - [ ] Enterprise dashboard for recruiters and HR teams
 - [ ] Browser extension for one-click job description analysis
+
+---
+
+Built with ❤️ by Nikshith Gurram
+
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
