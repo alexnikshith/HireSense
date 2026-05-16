@@ -192,7 +192,7 @@ class SuggestionsEngine:
                 )
 
         # Generic fallback: prepend strong verb
-        verb = random.choice(STRONG_VERBS[:10])
+        verb = random.choice(list(STRONG_VERBS)[:10])
         words = bullet.split()
         if words:
             # Remove weak first word
