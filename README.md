@@ -57,3 +57,11 @@ npm install
 npm run dev
 ```
 The application will be available at `http://localhost:3000`.
+
+## 🛤️ Roadmap
+
+- [ ] Multi-resume comparison tool
+- [ ] Integration with LinkedIn API for profile synchronization
+- [ ] Real-time interview simulation based on resume gaps
+- [ ] Enterprise dashboard for recruiters and HR teams
+- [ ] Browser extension for one-click job description analysis
