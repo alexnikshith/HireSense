@@ -14,13 +14,13 @@ try:
     from modules.nlp_engine import NLPEngine
     from modules.matcher import JobMatcher
     from modules.scorer import ATSScorer
-    from modules.suggestions import SuggestionEngine
+    from modules.suggestions import SuggestionsEngine
 except Exception as e:
     print(f"IMPORT ERROR: {str(e)}")
     class Dummy: 
         def __getattr__(self, name): 
             raise Exception(f"Backend failed to initialize. Error: {str(e)}")
-    ResumeParser = NLPEngine = JobMatcher = ATSScorer = SuggestionEngine = Dummy
+    ResumeParser = NLPEngine = JobMatcher = ATSScorer = SuggestionsEngine = Dummy
 
 app = FastAPI(title="HireSense AI API")
 
@@ -37,7 +37,7 @@ parser = ResumeParser()
 nlp = NLPEngine()
 matcher = JobMatcher()
 scorer = ATSScorer()
-suggester = SuggestionEngine()
+suggester = SuggestionsEngine()
 
 @app.get("/api/health")
 @app.get("/health")
@@ -76,11 +76,12 @@ async def analyze_resume(
         )
 
         # 5. Generate Suggestions
-        suggestions = suggester.generate_suggestions(
+        suggestions = suggester.generate(
             resume_data,
             analysis,
             match_results,
-            scores
+            scores,
+            job_description
         )
 
         return {
