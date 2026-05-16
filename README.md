@@ -27,7 +27,7 @@ Using a combination of **FastAPI**, **NLP (spaCy)**, and **Next.js 14**, HireSen
 ## 🏗️ Architecture
 
 HireSense follows a modern monorepo-style architecture:
-- **`/web`**: Next.js 14 frontend handling the user interface and analytics visualization.
+- **`/src`**: Next.js 14 frontend handling the user interface and analytics visualization.
 - **`/api`**: FastAPI backend exposing the core NLP and analysis endpoints.
 - **`/api/modules`**: Modular Python engines for parsing, matching, and scoring.
 
@@ -61,8 +61,6 @@ The API will be available at `http://localhost:8000`.
 
 ### 2. Frontend Setup
 ```bash
-cd web
-
 # Install dependencies
 npm install
 
