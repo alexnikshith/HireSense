@@ -25,3 +25,11 @@ HireSense follows a modern monorepo-style architecture:
 - **`/web`**: Next.js 14 frontend handling the user interface and analytics visualization.
 - **`/api`**: FastAPI backend exposing the core NLP and analysis endpoints.
 - **`/api/modules`**: Modular Python engines for parsing, matching, and scoring.
+
+## ✨ Features
+
+- **ATS Compatibility Scoring**: Instant feedback on how well your resume is optimized for automated systems.
+- **Skill Gap Analysis**: Intelligence layer that highlights exactly which keywords are missing from your profile.
+- **Hiring Readiness Radar**: Multi-dimensional visualization of formatting, keywords, and action verbs.
+- **Smart Rewrites**: AI-powered suggestions to transform weak bullet points into high-impact achievements.
+- **Modern SaaS Dashboard**: A premium, glassmorphism-based interface for managing your career assets.
