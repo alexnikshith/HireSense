@@ -16,12 +16,16 @@ class ResumeParser:
             # Detect sections and formatting
             sections = self._detect_sections(clean_text)
             formatting = self._check_formatting(text)
+            word_count = len(clean_text.split())
 
             return {
                 "text": clean_text,
                 "sections": sections,
                 "formatting_issues": formatting,
-                "page_count": 1 # pdfminer detection is complex, defaulting to 1 for lite version
+                "page_count": 1,
+                "word_count": word_count,
+                "has_tables": "  " in clean_text or "\t" in clean_text,
+                "has_images": False # Hard to detect with text-only extraction
             }
         except Exception as e:
             raise Exception(f"PDF Parsing Error: {str(e)}")

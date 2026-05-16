@@ -84,15 +84,37 @@ async def analyze_resume(
         )
 
         return {
-            "score": scores["overall_score"],
-            "dimensions": scores["dimensions"],
-            "match_percentage": match_results["match_score"],
-            "keywords_found": match_results["matching_keywords"],
-            "missing_keywords": match_results["missing_keywords"],
-            "analysis": analysis,
-            "suggestions": suggestions,
-            "formatting_feedback": scores["formatting_issues"],
-            "section_feedback": scores["section_feedback"]
+            "resume_meta": {
+                "filename": file.filename,
+                "page_count": resume_data.get("page_count", 1),
+                "has_tables": resume_data.get("has_tables", False),
+                "has_images": resume_data.get("has_images", False),
+                "word_count": resume_data.get("word_count", 0)
+            },
+            "ats": {
+                "overall_score": scores["overall_score"],
+                "grade": scores["grade"],
+                "dimensions": scores["dimensions"],
+                "formatting_issues": scores["formatting_issues"],
+                "section_feedback": scores["section_feedback"]
+            },
+            "matching": {
+                "match_score": match_results["match_score"],
+                "matching_keywords": match_results["matching_keywords"],
+                "missing_keywords": match_results["missing_keywords"],
+                "job_skills": match_results["job_skills"],
+                "resume_skills": match_results["resume_skills"]
+            },
+            "profile": {
+                "skills": analysis["skills"],
+                "experience_years": analysis["experience_years"],
+                "bullet_count": len(analysis["bullet_points"]),
+                "weak_bullet_count": len(analysis["weak_bullets"]),
+                "technical_skills": analysis["technical_skills"],
+                "soft_skills": analysis["soft_skills"],
+                "action_verb_score": analysis["action_verb_score"]
+            },
+            "suggestions": suggestions
         }
     except Exception as e:
         import traceback
