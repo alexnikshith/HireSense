@@ -33,3 +33,15 @@ HireSense follows a modern monorepo-style architecture:
 - **Hiring Readiness Radar**: Multi-dimensional visualization of formatting, keywords, and action verbs.
 - **Smart Rewrites**: AI-powered suggestions to transform weak bullet points into high-impact achievements.
 - **Modern SaaS Dashboard**: A premium, glassmorphism-based interface for managing your career assets.
+
+## 🚀 Getting Started
+
+### 1. Backend Setup
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the FastAPI server
+uvicorn api.index:app --reload --port 8000
+```
+The API will be available at `http://localhost:8000`.
