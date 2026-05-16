@@ -26,6 +26,14 @@ HireSense follows a modern monorepo-style architecture:
 - **`/api`**: FastAPI backend exposing the core NLP and analysis endpoints.
 - **`/api/modules`**: Modular Python engines for parsing, matching, and scoring.
 
+## 🧠 Core Engine Modules
+
+- **`parser.py`**: Extracts text and sections from complex PDF structures.
+- **`nlp_engine.py`**: Enriches text data with entity detection and skill extraction.
+- **`matcher.py`**: Computes semantic similarity between resumes and job descriptions.
+- **`scorer.py`**: Weighted algorithm for multi-dimensional ATS scoring.
+- **`suggestions.py`**: Rule-based engine for actionable resume improvements.
+
 ## ✨ Features
 
 - **ATS Compatibility Scoring**: Instant feedback on how well your resume is optimized for automated systems.
