@@ -15,11 +15,12 @@ try:
     from modules.matcher import JobMatcher
     from modules.scorer import ATSScorer
     from modules.suggestions import SuggestionsEngine
-except Exception as e:
-    print(f"IMPORT ERROR: {str(e)}")
+except Exception as _e:
+    err_msg = str(_e)
+    print(f"IMPORT ERROR: {err_msg}")
     class Dummy: 
         def __getattr__(self, name): 
-            raise Exception(f"Backend failed to initialize. Error: {str(e)}")
+            raise Exception(f"Backend failed to initialize. Error: {err_msg}")
     ResumeParser = NLPEngine = JobMatcher = ATSScorer = SuggestionsEngine = Dummy
 
 app = FastAPI(title="HireSense AI API")

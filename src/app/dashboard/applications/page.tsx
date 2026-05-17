@@ -13,10 +13,10 @@ export default function ApplicationsPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { label: "Applied", val: 12 },
-          { label: "Interviews", val: 4 },
-          { label: "Offered", val: 1 },
-          { label: "Rejected", val: 3 },
+          { label: "Applied", val: 0 },
+          { label: "Interviews", val: 0 },
+          { label: "Offered", val: 0 },
+          { label: "Rejected", val: 0 },
         ].map((s, i) => (
           <div key={i} className="glass-card p-6 rounded-[2rem] border-white/5 space-y-2">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{s.label}</p>
@@ -34,8 +34,9 @@ export default function ApplicationsPage() {
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-white/5"><td className="px-8 py-6 font-bold">Google</td><td className="px-8 py-6 text-primary font-bold">Interviewing</td></tr>
-            <tr className="border-b border-white/5"><td className="px-8 py-6 font-bold">Meta</td><td className="px-8 py-6 text-blue-500 font-bold">Applied</td></tr>
+            <tr className="border-b border-white/5">
+              <td colSpan={2} className="px-8 py-8 text-center text-muted-foreground">No applications tracked yet.</td>
+            </tr>
           </tbody>
         </table>
       </div>

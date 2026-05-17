@@ -19,24 +19,9 @@ export default function JobHuntPage() {
         <button className="px-6 py-4 glass-card rounded-2xl flex items-center gap-2 font-bold text-sm"><Filter size={18} /> Filters</button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="glass-card p-6 rounded-[2rem] border-white/5 space-y-6 hover:border-primary/30 transition-all cursor-pointer">
-            <div className="flex justify-between items-start">
-              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center font-bold text-primary">SC</div>
-              <span className="text-[10px] font-bold px-3 py-1 bg-green-500/10 text-green-500 rounded-full border border-green-500/20">85% Match</span>
-            </div>
-            <div>
-              <h3 className="font-bold">Senior Frontend Engineer</h3>
-              <p className="text-xs text-muted-foreground">SpaceX · Remote</p>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-[10px] px-2 py-1 bg-white/5 rounded-lg text-muted-foreground">React</span>
-              <span className="text-[10px] px-2 py-1 bg-white/5 rounded-lg text-muted-foreground">Next.js</span>
-            </div>
-            <button className="w-full py-3 bg-white/5 hover:bg-primary rounded-xl text-xs font-bold transition-all">Quick Apply</button>
-          </div>
-        ))}
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground glass-card rounded-[2.5rem] border-white/5">
+        <Briefcase size={48} className="opacity-20 mb-4" />
+        <p className="text-sm">No job matches found yet. Update your profile to get recommendations.</p>
       </div>
     </div>
   );

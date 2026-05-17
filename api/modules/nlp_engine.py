@@ -57,13 +57,13 @@ DEGREE_KEYWORDS = {
     "b.sc", "bsc", "m.sc", "msc", "b.a.", "ba", "m.a.", "ma",
 }
 
-WEAK_VERBS = [
+WEAK_VERBS = {
     "worked", "helped", "assisted", "did", "made", "got", "had",
     "used", "tried", "went", "handled", "dealt", "involved",
     "responsible", "participated", "contributed",
-]
+}
 
-STRONG_VERBS = [
+STRONG_VERBS = {
     "developed", "designed", "implemented", "architected", "built",
     "engineered", "optimized", "automated", "deployed", "migrated",
     "led", "managed", "coordinated", "mentored", "trained",
@@ -71,7 +71,7 @@ STRONG_VERBS = [
     "analyzed", "researched", "investigated", "evaluated", "assessed",
     "launched", "created", "established", "initiated", "spearheaded",
     "collaborated", "partnered", "facilitated", "streamlined", "transformed",
-]
+}
 
 class NLPEngine:
     """Extracts structured information from resume text using Regex and Keywords."""
