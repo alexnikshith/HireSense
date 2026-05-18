@@ -55,6 +55,11 @@ export default function JobHuntPage() {
     if (link) window.open(link, "_blank");
   };
 
+  const filteredJobs = jobs.filter(job => 
+    job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    job.company.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-8">
       <div>
@@ -88,7 +93,7 @@ export default function JobHuntPage() {
 
       {/* Job Listings */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {jobs.map((job, index) => (
+        {filteredJobs.map((job, index) => (
           <motion.div 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
@@ -151,7 +156,7 @@ export default function JobHuntPage() {
         ))}
       </div>
       
-      {!loading && jobs.length === 0 && !error && (
+      {!loading && filteredJobs.length === 0 && !error && (
         <div className="text-center py-20 text-muted-foreground">
           <Search size={48} className="mx-auto mb-4 opacity-20" />
           <p>No jobs found matching your search.</p>
