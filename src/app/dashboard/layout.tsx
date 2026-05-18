@@ -6,7 +6,7 @@ import {
   Files, BarChart2, User, LogOut, Sparkles, TrendingUp
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const menuItems = [
@@ -21,6 +21,7 @@ const menuItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [credits, setCredits] = useState<number>(400);
 
   useEffect(() => {
@@ -61,7 +62,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {credits} Credits
           </div>
           
-          <button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-1.5 rounded text-sm font-medium transition-all">
+          <button 
+            onClick={() => {
+              localStorage.removeItem("user_name");
+              localStorage.removeItem("user_email");
+              router.push("/login");
+            }}
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-1.5 rounded text-sm font-medium transition-all"
+          >
             <LogOut size={16} />
             Logout
           </button>
