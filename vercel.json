@@ -3,11 +3,5 @@
     "api/index.py": {
       "includeFiles": "api/**"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.py"
-    }
-  ]
+  }
 }
