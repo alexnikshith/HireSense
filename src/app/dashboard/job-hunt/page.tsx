@@ -37,7 +37,13 @@ export default function JobHuntPage() {
           applied: false,
           apply_link: job.job_apply_link
         }));
-        setJobs(formattedJobs);
+
+        // Filter out jobs already applied by the user
+        const storedIds = localStorage.getItem("user_applied_job_ids");
+        const appliedIds = storedIds ? JSON.parse(storedIds) : [];
+        const unappliedJobs = formattedJobs.filter((job: any) => !appliedIds.includes(job.id));
+
+        setJobs(unappliedJobs);
       }
     } catch (err: any) {
       setError(err.message);
@@ -50,10 +56,39 @@ export default function JobHuntPage() {
     fetchJobs();
   }, []); // Fetch on mount
 
-  const handleApply = (id: string, link: string) => {
-    // In a real app, deduct credits
-    setJobs(jobs.map(job => job.id === id ? { ...job, applied: true } : job));
-    if (link) window.open(link, "_blank");
+  const handleApply = (job: any) => {
+    // 1. Get current applied job IDs
+    const storedIds = localStorage.getItem("user_applied_job_ids");
+    const appliedIds = storedIds ? JSON.parse(storedIds) : [];
+    
+    // Add new ID
+    if (!appliedIds.includes(job.id)) {
+      appliedIds.push(job.id);
+      localStorage.setItem("user_applied_job_ids", JSON.stringify(appliedIds));
+    }
+
+    // 2. Get current applied jobs list
+    const storedJobs = localStorage.getItem("user_applied_jobs_list");
+    const appliedJobs = storedJobs ? JSON.parse(storedJobs) : [];
+    
+    // Add full job details
+    const newAppliedJob = {
+      ...job,
+      status: "Applied",
+      appliedAt: new Date().toLocaleDateString()
+    };
+    
+    // Prevent duplicates in detailed list
+    if (!appliedJobs.some((j: any) => j.id === job.id)) {
+      appliedJobs.push(newAppliedJob);
+      localStorage.setItem("user_applied_jobs_list", JSON.stringify(appliedJobs));
+    }
+
+    // 3. Open application link
+    if (job.apply_link) window.open(job.apply_link, "_blank");
+
+    // 4. Instantly remove from the frontend visible list
+    setJobs(prevJobs => prevJobs.filter(j => j.id !== job.id));
   };
 
   const filteredJobs = jobs.filter(job => 
@@ -145,7 +180,7 @@ export default function JobHuntPage() {
                   <CheckCircle2 size={16} /> Applied
                 </button>
               ) : (
-                <button onClick={() => handleApply(job.id, job.apply_link)} className="flex-1 py-3 bg-foreground text-background font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-foreground/90 transition-all">
+                <button onClick={() => handleApply(job)} className="flex-1 py-3 bg-foreground text-background font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-foreground/90 transition-all">
                   Quick Apply
                 </button>
               )}
