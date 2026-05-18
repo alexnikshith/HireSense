@@ -25,6 +25,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [credits, setCredits] = useState<number>(400);
 
   useEffect(() => {
+    // Check authentication
+    const userName = localStorage.getItem("user_name");
+    if (!userName) {
+      router.push("/login");
+      return;
+    }
+
     const stored = localStorage.getItem("user_credits");
     if (!stored) {
       localStorage.setItem("user_credits", "400");
