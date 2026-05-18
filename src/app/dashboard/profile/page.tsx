@@ -71,13 +71,25 @@ export default function ProfilePage() {
 
       {/* Subscription Section */}
       <h2 className="text-2xl font-bold tracking-tight pt-8">Subscription & Credits</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Free Plan */}
+        <div className="glass-card p-8 rounded-[2.5rem] flex flex-col justify-between border border-white/5 hover:border-primary/50 transition-all">
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold">Free Plan</h3>
+            <p className="text-4xl font-bold">₹0</p>
+            <p className="text-muted-foreground text-sm">Add 400 N Credits to your account.</p>
+          </div>
+          <button onClick={() => handleSimulatePayment(400)} className="mt-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-bold text-sm transition-all">
+            Claim Free
+          </button>
+        </div>
+
         {/* Plan 1 */}
         <div className="glass-card p-8 rounded-[2.5rem] flex flex-col justify-between border border-white/5 hover:border-primary/50 transition-all">
           <div className="space-y-4">
             <h3 className="text-xl font-bold">Standard Plan</h3>
             <p className="text-4xl font-bold">₹500</p>
-            <p className="text-muted-foreground">Add 450 N Credits to your account.</p>
+            <p className="text-muted-foreground text-sm">Add 450 N Credits to your account.</p>
           </div>
           <button onClick={() => handleBuyCredits("standard")} className="mt-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-bold text-sm transition-all">
             Buy Now
@@ -85,12 +97,12 @@ export default function ProfilePage() {
         </div>
 
         {/* Plan 2 */}
-        <div className="glass-card p-8 rounded-[2.5rem] flex flex-col justify-between border border-primary/50 bg-primary/5 shadow-[0_0_30px_rgba(139,92,246,0.1)] transition-all">
+        <div className="glass-card p-8 rounded-[2.5rem] flex flex-col justify-between border border-primary/50 bg-primary/5 shadow-[0_0_30px_rgba(139,92,246,0.1)] transition-all relative overflow-hidden">
           <div className="space-y-4">
-            <div className="inline-block px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full mb-2">MOST POPULAR</div>
+            <div className="inline-block px-3 py-1 bg-primary/20 text-primary text-[10px] font-bold rounded-full mb-2">MOST POPULAR</div>
             <h3 className="text-xl font-bold">Pro Plan</h3>
             <p className="text-4xl font-bold">₹1000</p>
-            <p className="text-muted-foreground">Add 900 N Credits to your account.</p>
+            <p className="text-muted-foreground text-sm">Add 900 N Credits to your account.</p>
           </div>
           <button onClick={() => handleBuyCredits("pro")} className="mt-8 py-3 bg-primary text-white rounded-2xl font-bold text-sm shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all">
             Buy Now
