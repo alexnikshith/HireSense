@@ -7,10 +7,18 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [saved, setSaved] = useState(false);
-  const [showPayment, setShowPayment] = useState<string | null>(null);
-  const [utr, setUtr] = useState("");
   const [credits, setCredits] = useState<number>(400);
   const [activePlan, setActivePlan] = useState<string>("free");
+
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
   useEffect(() => {
     setName(localStorage.getItem("user_name") || "");
@@ -35,30 +43,54 @@ export default function ProfilePage() {
     return name.substring(0, 2).toUpperCase();
   };
 
-  const handleBuyCredits = (plan: string) => {
-    setShowPayment(plan);
-  };
-
-  const handleSimulatePayment = (amountToAdd: number, planId: string) => {
-    if (planId !== "free" && utr.length < 12) {
-      alert("Please enter a valid 12-digit UTR/Transaction ID to verify your payment.");
+  const displayRazorpay = async (planId: string, amount: number, creditsToAdd: number) => {
+    if (planId === "free") {
+      const current = parseInt(localStorage.getItem("user_credits") || "400");
+      const updated = current + creditsToAdd;
+      localStorage.setItem("user_credits", updated.toString());
+      localStorage.setItem("active_plan", planId);
+      setCredits(updated);
+      setActivePlan(planId);
+      window.dispatchEvent(new Event("credits_updated"));
+      alert("Successfully claimed Free Plan!");
       return;
     }
 
-    if (planId !== "free") {
-      alert(`Payment verification pending for UTR: ${utr}. In a real app, an admin would verify this before adding credits! For now, we will add them instantly for testing.`);
+    const res = await loadRazorpay();
+    if (!res) {
+      alert("Razorpay SDK failed to load. Please check your internet connection.");
+      return;
     }
 
-    const current = parseInt(localStorage.getItem("user_credits") || "400");
-    const updated = current + amountToAdd;
-    localStorage.setItem("user_credits", updated.toString());
-    localStorage.setItem("active_plan", planId);
-    setCredits(updated);
-    setActivePlan(planId);
-    window.dispatchEvent(new Event("credits_updated"));
-    setShowPayment(null);
-    setUtr("");
-    if (planId === "free") alert("Successfully claimed Free Plan!");
+    const options = {
+      key: "rzp_test_YOUR_TEST_KEY_HERE", // TODO: Replace with your actual Razorpay Test/Live Key
+      amount: amount * 100, // Amount in paise
+      currency: "INR",
+      name: "HireSense",
+      description: `${creditsToAdd} N Credits`,
+      handler: function (response: any) {
+        // Payment successful (Frontend simulation of backend verification)
+        const current = parseInt(localStorage.getItem("user_credits") || "400");
+        const updated = current + creditsToAdd;
+        localStorage.setItem("user_credits", updated.toString());
+        localStorage.setItem("active_plan", planId);
+        setCredits(updated);
+        setActivePlan(planId);
+        window.dispatchEvent(new Event("credits_updated"));
+        
+        alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}\n\nAdded ${creditsToAdd} credits to your account.`);
+      },
+      prefill: {
+        name: name,
+        email: email,
+      },
+      theme: {
+        color: "#8b5cf6", // Matches your primary color
+      },
+    };
+
+    const paymentObject = new (window as any).Razorpay(options);
+    paymentObject.open();
   };
   return (
     <div className="p-8 space-y-10 max-w-4xl">
@@ -94,7 +126,7 @@ export default function ProfilePage() {
             <p className="text-3xl font-bold">₹0</p>
             <p className="text-muted-foreground text-xs">Add 400 N Credits to your account.</p>
           </div>
-          <button disabled={activePlan === "free"} onClick={() => handleSimulatePayment(400, "free")} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "free" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-white/10 hover:bg-white/20 text-white"}`}>
+          <button disabled={activePlan === "free"} onClick={() => displayRazorpay("free", 0, 400)} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "free" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-white/10 hover:bg-white/20 text-white"}`}>
             {activePlan === "free" ? "Current Plan" : "Claim Free"}
           </button>
         </div>
@@ -106,7 +138,7 @@ export default function ProfilePage() {
             <p className="text-3xl font-bold">₹500</p>
             <p className="text-muted-foreground text-xs">Add 450 N Credits to your account.</p>
           </div>
-          <button disabled={activePlan === "standard"} onClick={() => handleBuyCredits("standard")} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "standard" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-white/10 hover:bg-white/20 text-white"}`}>
+          <button disabled={activePlan === "standard"} onClick={() => displayRazorpay("standard", 500, 450)} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "standard" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-white/10 hover:bg-white/20 text-white"}`}>
             {activePlan === "standard" ? "Current Plan" : "Buy Now"}
           </button>
         </div>
@@ -119,51 +151,11 @@ export default function ProfilePage() {
             <p className="text-3xl font-bold">₹1000</p>
             <p className="text-muted-foreground text-xs">Add 900 N Credits to your account.</p>
           </div>
-          <button disabled={activePlan === "pro"} onClick={() => handleBuyCredits("pro")} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "pro" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:scale-[1.02]"}`}>
+          <button disabled={activePlan === "pro"} onClick={() => displayRazorpay("pro", 1000, 900)} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "pro" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:scale-[1.02]"}`}>
             {activePlan === "pro" ? "Current Plan" : "Buy Now"}
           </button>
         </div>
       </div>
-
-      {/* Payment Modal Overlay */}
-      {showPayment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card bg-[#0A0A0A] p-8 rounded-[2.5rem] border border-primary/50 max-w-md w-full space-y-6 shadow-2xl">
-            <h3 className="text-2xl font-bold text-primary">Complete Your Payment</h3>
-            <p className="text-muted-foreground">
-              You are purchasing the <strong className="text-white">{showPayment === "standard" ? "Standard Plan (450 Credits)" : "Pro Plan (900 Credits)"}</strong>.
-            </p>
-            <div className="p-6 bg-white/5 rounded-2xl border border-white/10 text-center space-y-2">
-              <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Pay via UPI</p>
-              <p className="text-2xl font-mono tracking-wider font-bold">7569778915@axl</p>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">UTR / Transaction ID</label>
-              <input 
-                type="text" 
-                value={utr}
-                onChange={(e) => setUtr(e.target.value)}
-                placeholder="Enter 12-digit UTR..." 
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all" 
-              />
-              <p className="text-[10px] text-muted-foreground mt-1 ml-1">After transferring, paste the 12-digit reference number here for verification.</p>
-            </div>
-
-            <div className="flex gap-4 pt-4">
-              <button onClick={() => setShowPayment(null)} className="flex-1 py-3 bg-white/10 text-white rounded-2xl font-bold text-sm hover:bg-white/20 transition-all">
-                Cancel
-              </button>
-              <button 
-                onClick={() => handleSimulatePayment(showPayment === "standard" ? 450 : 900, showPayment as string)} 
-                className="flex-1 py-3 bg-green-500 text-white rounded-2xl font-bold text-sm shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 transition-all"
-              >
-                Verify & Submit
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
     </div>
   );
 }
