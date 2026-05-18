@@ -80,13 +80,13 @@ async def get_jobs(query: str = "developer", page: int = 1):
         raise HTTPException(status_code=500, detail="RapidAPI Key not configured in backend!")
         
     url = "https://jsearch.p.rapidapi.com/search-v2"
-    querystring = {"query": query, "page": str(page), "num_pages": "3"}
+    querystring = {"query": query, "page": str(page), "num_pages": "2"}
     headers = {
         "x-rapidapi-key": api_key,
         "x-rapidapi-host": "jsearch.p.rapidapi.com"
     }
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             response = await client.get(url, headers=headers, params=querystring)
             response.raise_for_status()
@@ -94,7 +94,8 @@ async def get_jobs(query: str = "developer", page: int = 1):
         except httpx.HTTPStatusError as e:
             raise HTTPException(status_code=e.response.status_code, detail=f"JSearch API Error: {e.response.text}")
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to fetch jobs: {str(e)}")
+            err_msg = str(e) if str(e) else repr(e)
+            raise HTTPException(status_code=500, detail=f"Failed to fetch jobs: {err_msg}")
 
 @app.post("/api/analyze")
 @app.post("/analyze")
