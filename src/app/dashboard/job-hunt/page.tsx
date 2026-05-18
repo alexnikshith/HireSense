@@ -1,74 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, MapPin, Briefcase, DollarSign, ExternalLink, Zap, CheckCircle2 } from "lucide-react";
-
-// Realistic mock data for the initial UI
-const MOCK_JOBS = [
-  {
-    id: 1,
-    title: "Senior Frontend Engineer",
-    company: "Vercel",
-    location: "Remote",
-    salary: "$140k - $180k",
-    type: "Full-time",
-    match: 94,
-    logo: "https://logo.clearbit.com/vercel.com",
-    posted: "2 hours ago",
-    applied: false
-  },
-  {
-    id: 2,
-    title: "Product Designer",
-    company: "Stripe",
-    location: "San Francisco, CA",
-    salary: "$130k - $170k",
-    type: "Full-time",
-    match: 88,
-    logo: "https://logo.clearbit.com/stripe.com",
-    posted: "5 hours ago",
-    applied: false
-  },
-  {
-    id: 3,
-    title: "Full Stack Developer",
-    company: "Linear",
-    location: "Remote",
-    salary: "$120k - $160k",
-    type: "Full-time",
-    match: 91,
-    logo: "https://logo.clearbit.com/linear.app",
-    posted: "1 day ago",
-    applied: true
-  },
-  {
-    id: 4,
-    title: "AI Engineer",
-    company: "OpenAI",
-    location: "San Francisco, CA",
-    salary: "$180k - $250k",
-    type: "Full-time",
-    match: 75,
-    logo: "https://logo.clearbit.com/openai.com",
-    posted: "2 days ago",
-    applied: false
-  }
-];
+import { Search, MapPin, Briefcase, DollarSign, ExternalLink, Zap, CheckCircle2, Loader2 } from "lucide-react";
 
 export default function JobHuntPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [jobs, setJobs] = useState(MOCK_JOBS);
+  const [searchQuery, setSearchQuery] = useState("developer");
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleApply = (id: number) => {
-    // In a real app, this would deduct credits and save to Applications DB
-    setJobs(jobs.map(job => job.id === id ? { ...job, applied: true } : job));
+  const fetchJobs = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+      const res = await fetch(`${baseUrl}/api/jobs?query=${encodeURIComponent(searchQuery)}&page=1`);
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.detail || "Failed to fetch jobs");
+      
+      // JSearch returns an array in data.data
+      if (data.data && Array.isArray(data.data)) {
+        // Map JSearch schema to our UI
+        const formattedJobs = data.data.map((job: any) => ({
+          id: job.job_id,
+          title: job.job_title,
+          company: job.employer_name,
+          location: job.job_city ? `${job.job_city}, ${job.job_country}` : "Remote",
+          salary: job.job_min_salary ? `$${job.job_min_salary / 1000}k - $${job.job_max_salary / 1000}k` : "Not disclosed",
+          type: job.job_employment_type || "Full-time",
+          match: Math.floor(Math.random() * (99 - 70 + 1) + 70), // Mock match score
+          logo: job.employer_logo || "https://via.placeholder.com/150",
+          posted: job.job_posted_at_datetime_utc ? new Date(job.job_posted_at_datetime_utc).toLocaleDateString() : "Recently",
+          applied: false,
+          apply_link: job.job_apply_link
+        }));
+        setJobs(formattedJobs);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredJobs = jobs.filter(job => 
-    job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    job.company.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    fetchJobs();
+  }, []); // Fetch on mount
+
+  const handleApply = (id: string, link: string) => {
+    // In a real app, deduct credits
+    setJobs(jobs.map(job => job.id === id ? { ...job, applied: true } : job));
+    if (link) window.open(link, "_blank");
+  };
 
   return (
     <div className="space-y-8">
@@ -89,14 +74,21 @@ export default function JobHuntPage() {
             className="w-full bg-transparent border-none py-3 text-sm focus:outline-none text-foreground"
           />
         </div>
-        <button className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl text-sm transition-transform hover:scale-[1.02]">
+        <button onClick={fetchJobs} disabled={loading} className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl text-sm transition-transform hover:scale-[1.02] disabled:opacity-50">
+          {loading ? <Loader2 size={16} className="animate-spin inline mr-2" /> : null}
           Search Roles
         </button>
       </div>
 
+      {error && (
+        <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-200">
+          Error loading jobs: {error}
+        </div>
+      )}
+
       {/* Job Listings */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredJobs.map((job, index) => (
+        {jobs.map((job, index) => (
           <motion.div 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
@@ -147,19 +139,19 @@ export default function JobHuntPage() {
                   <CheckCircle2 size={16} /> Applied
                 </button>
               ) : (
-                <button onClick={() => handleApply(job.id)} className="flex-1 py-3 bg-foreground text-background font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-foreground/90 transition-all">
+                <button onClick={() => handleApply(job.id, job.apply_link)} className="flex-1 py-3 bg-foreground text-background font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-foreground/90 transition-all">
                   Quick Apply
                 </button>
               )}
-              <button className="px-4 py-3 bg-muted text-muted-foreground rounded-xl hover:bg-muted/80 transition-all">
+              <a href={job.apply_link} target="_blank" rel="noreferrer" className="px-4 py-3 bg-muted text-muted-foreground rounded-xl hover:bg-muted/80 transition-all flex items-center justify-center">
                 <ExternalLink size={18} />
-              </button>
+              </a>
             </div>
           </motion.div>
         ))}
       </div>
       
-      {filteredJobs.length === 0 && (
+      {!loading && jobs.length === 0 && !error && (
         <div className="text-center py-20 text-muted-foreground">
           <Search size={48} className="mx-auto mb-4 opacity-20" />
           <p>No jobs found matching your search.</p>
