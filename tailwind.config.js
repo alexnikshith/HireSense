@@ -11,7 +11,7 @@ module.exports = {
         background: "hsl(210 20% 98%)",
         foreground: "hsl(0 0% 10%)",
         primary: {
-          DEFAULT: "hsl(350 56% 36%)", /* Dark Maroon/Red */
+          DEFAULT: "hsl(0 0% 0%)", /* Black */
           foreground: "hsl(0 0% 100%)",
         },
         card: {
