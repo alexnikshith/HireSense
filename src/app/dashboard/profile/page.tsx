@@ -114,21 +114,21 @@ export default function ProfilePage() {
     <div className="p-8 space-y-10 max-w-4xl">
       <h1 className="text-3xl font-bold tracking-tight">Profile Settings</h1>
       
-      <div className="glass-card rounded-[2.5rem] border-white/5 overflow-hidden">
-        <div className="h-32 bg-gradient-to-r from-primary/20 to-blue-500/20" />
+      <div className="glass-card rounded-[2.5rem] overflow-hidden">
+        <div className="h-32 bg-primary/10" />
         <div className="px-8 pb-8 space-y-8">
-          <div className="w-24 h-24 rounded-3xl bg-[#0A0A0A] -mt-12 border-4 border-[#0A0A0A] flex items-center justify-center text-3xl font-bold text-primary shadow-2xl">{getInitials()}</div>
+          <div className="w-24 h-24 rounded-3xl bg-white -mt-12 border-4 border-white flex items-center justify-center text-3xl font-bold text-primary shadow-md">{getInitials()}</div>
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Full Name</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your full name" className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 text-sm" />
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your full name" className="w-full bg-transparent border border-border rounded-2xl py-3 px-4 text-sm focus:outline-none focus:border-primary" />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 text-sm" />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" className="w-full bg-transparent border border-border rounded-2xl py-3 px-4 text-sm focus:outline-none focus:border-primary" />
             </div>
           </div>
-          <button onClick={handleSave} className="px-8 py-3 bg-primary text-white rounded-2xl font-bold text-sm shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+          <button onClick={handleSave} className="px-8 py-3 bg-primary text-primary-foreground rounded-2xl font-bold text-sm shadow-md hover:opacity-90 transition-all">
             {saved ? "Saved!" : "Save Changes"}
           </button>
         </div>
@@ -138,38 +138,38 @@ export default function ProfilePage() {
       <h2 className="text-2xl font-bold tracking-tight pt-8">Subscription & Credits</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Free Plan */}
-        <div className="glass-card p-6 rounded-[2rem] flex flex-col justify-between border border-white/5 hover:border-primary/50 transition-all">
+        <div className="glass-card p-6 rounded-[2rem] flex flex-col justify-between hover:border-primary/50 transition-all">
           <div className="space-y-3">
             <h3 className="text-lg font-bold">Free Plan</h3>
             <p className="text-3xl font-bold">₹0</p>
             <p className="text-muted-foreground text-xs">Add 400 N Credits to your account.</p>
           </div>
-          <button disabled={activePlan === "free"} onClick={() => displayRazorpay("free", 0, 400)} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "free" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-white/10 hover:bg-white/20 text-white"}`}>
+          <button disabled={activePlan === "free"} onClick={() => displayRazorpay("free", 0, 400)} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all border ${activePlan === "free" ? "bg-muted text-muted-foreground cursor-not-allowed border-transparent" : "border-border text-foreground hover:bg-muted"}`}>
             {activePlan === "free" ? "Current Plan" : "Claim Free"}
           </button>
         </div>
 
         {/* Plan 1 */}
-        <div className="glass-card p-6 rounded-[2rem] flex flex-col justify-between border border-white/5 hover:border-primary/50 transition-all">
+        <div className="glass-card p-6 rounded-[2rem] flex flex-col justify-between hover:border-primary/50 transition-all">
           <div className="space-y-3">
             <h3 className="text-lg font-bold">Standard Plan</h3>
             <p className="text-3xl font-bold">₹500</p>
             <p className="text-muted-foreground text-xs">Add 450 N Credits to your account.</p>
           </div>
-          <button disabled={activePlan === "standard"} onClick={() => displayRazorpay("standard", 500, 450)} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "standard" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-white/10 hover:bg-white/20 text-white"}`}>
+          <button disabled={activePlan === "standard"} onClick={() => displayRazorpay("standard", 500, 450)} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all border ${activePlan === "standard" ? "bg-muted text-muted-foreground cursor-not-allowed border-transparent" : "border-border text-foreground hover:bg-muted"}`}>
             {activePlan === "standard" ? "Current Plan" : "Buy Now"}
           </button>
         </div>
 
         {/* Plan 2 */}
-        <div className="glass-card p-6 rounded-[2rem] flex flex-col justify-between border border-primary/50 bg-primary/5 shadow-[0_0_30px_rgba(139,92,246,0.1)] transition-all relative overflow-hidden">
+        <div className="glass-card p-6 rounded-[2rem] flex flex-col justify-between border-2 border-primary bg-primary/5 shadow-lg transition-all relative overflow-hidden">
           <div className="space-y-3">
             <div className="inline-block px-2 py-0.5 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1">MOST POPULAR</div>
             <h3 className="text-lg font-bold">Pro Plan</h3>
             <p className="text-3xl font-bold">₹1000</p>
             <p className="text-muted-foreground text-xs">Add 900 N Credits to your account.</p>
           </div>
-          <button disabled={activePlan === "pro"} onClick={() => displayRazorpay("pro", 1000, 900)} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "pro" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:scale-[1.02]"}`}>
+          <button disabled={activePlan === "pro"} onClick={() => displayRazorpay("pro", 1000, 900)} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "pro" ? "bg-muted text-muted-foreground cursor-not-allowed" : "bg-primary text-primary-foreground shadow-md hover:opacity-90"}`}>
             {activePlan === "pro" ? "Current Plan" : "Buy Now"}
           </button>
         </div>

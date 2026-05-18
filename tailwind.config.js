@@ -8,20 +8,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "hsl(240 10% 3.9%)",
-        foreground: "hsl(0 0% 98%)",
+        background: "hsl(210 20% 98%)",
+        foreground: "hsl(0 0% 10%)",
         primary: {
-          DEFAULT: "hsl(263.4 70% 50.4%)",
-          foreground: "hsl(210 40% 98%)",
+          DEFAULT: "hsl(350 56% 36%)", /* Dark Maroon/Red */
+          foreground: "hsl(0 0% 100%)",
         },
         card: {
-          DEFAULT: "hsl(240 10% 3.9%)",
-          foreground: "hsl(0 0% 98%)",
+          DEFAULT: "hsl(0 0% 100%)",
+          foreground: "hsl(0 0% 10%)",
         },
-        border: "hsl(240 3.7% 15.9%)",
+        border: "hsl(214 32% 91%)",
         muted: {
-          DEFAULT: "hsl(240 3.7% 15.9%)",
-          foreground: "hsl(240 5% 64.9%)",
+          DEFAULT: "hsl(210 40% 96%)",
+          foreground: "hsl(215 16% 47%)",
         },
       },
     },

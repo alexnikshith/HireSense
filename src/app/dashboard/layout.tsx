@@ -46,62 +46,56 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[#0A0A0A] text-white">
-      {/* Sidebar */}
-      <aside className="w-72 border-r border-white/5 p-6 flex flex-col gap-8 sticky top-0 h-screen overflow-y-auto">
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.3)]">
-            <Sparkles className="text-white" size={20} />
-          </div>
-          <span className="text-2xl font-bold tracking-tighter">HireSense</span>
+    <div className="flex flex-col min-h-screen bg-background text-foreground font-sans">
+      {/* Top Header - Maroon Theme */}
+      <header className="bg-primary text-primary-foreground py-3 px-6 flex justify-between items-center shadow-md z-10 relative">
+        <div className="flex items-center gap-3">
+          <Sparkles size={22} className="text-white" />
+          <span className="text-xl font-bold tracking-wide">HireSense</span>
         </div>
 
-        <nav className="flex-1 space-y-1">
+        <div className="flex items-center gap-4">
+          {/* N Credits Widget */}
+          <div className="bg-white/10 px-4 py-1.5 rounded text-sm font-semibold flex items-center gap-2 border border-white/20">
+            <TrendingUp size={16} />
+            {credits} Credits
+          </div>
+          
+          <button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-1.5 rounded text-sm font-medium transition-all">
+            <LogOut size={16} />
+            Logout
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 w-full max-w-[1400px] mx-auto p-6 flex flex-col">
+        
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-8 border-b border-border mb-6 overflow-x-auto">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                className={`flex items-center gap-2 py-3 text-sm font-medium transition-all border-b-2 whitespace-nowrap -mb-[1px] ${
                   isActive 
-                  ? "bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.2)]" 
-                  : "text-muted-foreground hover:text-white hover:bg-white/5"
+                  ? "border-primary text-primary" 
+                  : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <item.icon size={20} />
+                <item.icon size={16} className={isActive ? "text-primary" : "text-muted-foreground"} />
                 {item.label}
               </Link>
             );
           })}
-        </nav>
-
-        {/* N Score Widget */}
-        <div className="glass-card p-5 rounded-2xl space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">N Credits</span>
-            <TrendingUp size={14} className="text-primary" />
-          </div>
-          <div className="space-y-1">
-            <div className="text-2xl font-bold">{credits}<span className="text-xs text-muted-foreground ml-1">credits</span></div>
-            <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-primary shadow-[0_0_10px_#8b5cf6]" style={{ width: `${Math.min((credits / 900) * 100, 100)}%` }} />
-            </div>
-          </div>
-          <p className="text-[10px] text-muted-foreground italic">
-            {credits > 0 ? "You have credits available to apply." : "Out of credits. Please subscribe."}
-          </p>
         </div>
 
-        <button className="flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-500/5 transition-all">
-          <LogOut size={20} />
-          Logout
-        </button>
-      </aside>
-
-      <main className="flex-1 overflow-x-hidden relative">
-         <div className="absolute top-0 right-0 w-[50%] h-[30%] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-         {children}
+        {/* Page Content wrapped in a white card container similar to screenshots */}
+        <div className="flex-1 bg-white p-8 rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-border overflow-hidden">
+          {children}
+        </div>
       </main>
     </div>
   );
