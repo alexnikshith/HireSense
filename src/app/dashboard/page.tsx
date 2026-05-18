@@ -77,7 +77,7 @@ export default function DashboardPage() {
           <p className="text-muted-foreground text-sm">Analyze your resume against any job description.</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="px-4 py-2 glass-card rounded-xl text-xs font-bold flex items-center gap-2">
+          <div className="px-4 py-2 glass-card rounded-xl text-xs font-bold flex items-center gap-2 border-border">
             <Sparkles size={14} className="text-primary" /> Pro Plan
           </div>
         </div>
@@ -86,15 +86,15 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left: Input */}
         <div className="lg:col-span-7 space-y-8">
-          <div className="glass-card p-8 rounded-[2.5rem] border-white/5 space-y-6">
+          <div className="glass-card p-8 rounded-[2.5rem] border-border space-y-6">
              <div className="space-y-4">
                <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Resume Upload</h3>
                <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.doc,.docx" />
-               <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-white/10 rounded-[2rem] p-12 flex flex-col items-center justify-center gap-4 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group">
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:scale-110 transition-all">
+               <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-border rounded-[2rem] p-12 flex flex-col items-center justify-center gap-4 hover:border-primary/50 hover:bg-muted transition-all cursor-pointer group">
+                  <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:scale-110 transition-all">
                     {selectedFile ? <FileText size={32} className="text-primary" /> : <Upload size={32} />}
                   </div>
-                  <div className="text-center">
+                  <div className="text-center text-foreground">
                     <p className="font-bold">{selectedFile ? selectedFile.name : "Drop your resume here or click to browse"}</p>
                     <p className="text-xs text-muted-foreground mt-1">{selectedFile ? "File selected successfully" : "PDF format highly recommended"}</p>
                   </div>
@@ -107,7 +107,7 @@ export default function DashboardPage() {
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   placeholder="Paste the job description here..."
-                  className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 min-h-[200px] text-sm focus:outline-none focus:border-primary/50 transition-all resize-none"
+                  className="w-full bg-transparent border border-border rounded-3xl p-6 min-h-[200px] text-sm text-foreground focus:outline-none focus:border-primary/50 transition-all resize-none"
                />
              </div>
 
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                  <AlertCircle size={16} /> {error}
                </div>
              )}
-             <button onClick={handleAnalyze} disabled={loading} className="w-full py-5 bg-primary text-white rounded-3xl font-bold text-lg shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2">
+             <button onClick={handleAnalyze} disabled={loading} className="w-full py-5 bg-primary text-primary-foreground rounded-3xl font-bold text-lg shadow-md hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2">
                 {loading ? <><Loader2 className="animate-spin" /> Analyzing...</> : "Run AI Analysis"}
              </button>
           </div>
@@ -124,7 +124,7 @@ export default function DashboardPage() {
 
         {/* Right: Insights */}
         <div className="lg:col-span-5 space-y-8">
-          <div className="glass-card p-8 rounded-[2.5rem] border-white/5 space-y-6">
+          <div className="glass-card p-8 rounded-[2.5rem] border-border space-y-6">
             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Analysis Status</h3>
             
             {loading ? (
@@ -134,18 +134,18 @@ export default function DashboardPage() {
               </div>
             ) : result ? (
               <div className="space-y-6">
-                <div className="flex items-center justify-between p-6 bg-white/5 rounded-3xl border border-white/10">
+                <div className="flex items-center justify-between p-6 bg-muted rounded-3xl border border-border">
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">ATS Score</p>
-                    <div className="text-4xl font-bold text-white">{result.ats?.overall_score || 0}/100</div>
+                    <div className="text-4xl font-bold text-foreground">{result.ats?.overall_score || 0}/100</div>
                   </div>
-                  <div className="w-16 h-16 rounded-full border-4 border-primary flex items-center justify-center font-bold text-xl text-primary">{result.ats?.grade || "N/A"}</div>
+                  <div className="w-16 h-16 rounded-full border-4 border-primary flex items-center justify-center font-bold text-xl text-primary bg-white">{result.ats?.grade || "N/A"}</div>
                 </div>
 
                 <div className="space-y-3">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-2">Top Suggestions</p>
                   {result.suggestions?.priority_actions?.slice(0, 3).map((s: string, i: number) => (
-                    <div key={i} className="p-4 bg-white/5 rounded-2xl text-sm border border-white/5 flex gap-3 items-start">
+                    <div key={i} className="p-4 bg-muted rounded-2xl text-sm border border-border flex gap-3 items-start text-foreground">
                       <Sparkles size={16} className="text-primary mt-0.5 shrink-0" />
                       <span>{s}</span>
                     </div>
@@ -161,11 +161,11 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <div className="glass-card p-6 rounded-[2rem] border-border text-foreground">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Match Rate</p>
               <div className="text-2xl font-bold">{result?.matching?.match_score ? `${result.matching.match_score}%` : "--"}</div>
             </div>
-            <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <div className="glass-card p-6 rounded-[2rem] border-border text-foreground">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Word Count</p>
               <div className="text-2xl font-bold text-primary italic">{result?.resume_meta?.word_count || "--"}</div>
             </div>
