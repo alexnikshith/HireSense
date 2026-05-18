@@ -23,6 +23,12 @@ export default function DashboardPage() {
       setError("Please upload a resume and paste a job description.");
       return;
     }
+
+    const currentCredits = parseInt(localStorage.getItem("user_credits") || "400");
+    if (currentCredits < 50) {
+      setError("Not enough credits to run analysis. Please subscribe in your Profile to get more credits.");
+      return;
+    }
     
     setError(null);
     setLoading(true);
@@ -50,6 +56,11 @@ export default function DashboardPage() {
 
       if (!res.ok) throw new Error(data.detail || "Analysis failed");
       
+      // Deduct credits on success
+      const newCredits = currentCredits - 50;
+      localStorage.setItem("user_credits", newCredits.toString());
+      window.dispatchEvent(new Event("credits_updated"));
+
       setResult(data);
     } catch (err: any) {
       setError(err.message || "An error occurred during analysis.");

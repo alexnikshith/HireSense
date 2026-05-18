@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -20,6 +21,29 @@ const menuItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [credits, setCredits] = useState<number>(400);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("user_credits");
+    if (!stored) {
+      localStorage.setItem("user_credits", "400");
+      setCredits(400);
+    } else {
+      setCredits(parseInt(stored));
+    }
+
+    const handleStorageChange = () => {
+      const updated = localStorage.getItem("user_credits");
+      if (updated) setCredits(parseInt(updated));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("credits_updated", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("credits_updated", handleStorageChange);
+    };
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-[#0A0A0A] text-white">
@@ -55,16 +79,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* N Score Widget */}
         <div className="glass-card p-5 rounded-2xl space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">N Score</span>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">N Credits</span>
             <TrendingUp size={14} className="text-primary" />
           </div>
           <div className="space-y-1">
-            <div className="text-2xl font-bold">742<span className="text-xs text-muted-foreground ml-1">/ 900</span></div>
+            <div className="text-2xl font-bold">{credits}<span className="text-xs text-muted-foreground ml-1">credits</span></div>
             <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-primary w-[82%] shadow-[0_0_10px_#8b5cf6]" />
+              <div className="h-full bg-primary shadow-[0_0_10px_#8b5cf6]" style={{ width: `${Math.min((credits / 900) * 100, 100)}%` }} />
             </div>
           </div>
-          <p className="text-[10px] text-muted-foreground italic">Top 5% of candidates this week</p>
+          <p className="text-[10px] text-muted-foreground italic">
+            {credits > 0 ? "You have credits available to apply." : "Out of credits. Please subscribe."}
+          </p>
         </div>
 
         <button className="flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-500/5 transition-all">
