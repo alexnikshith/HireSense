@@ -179,6 +179,71 @@ async def analyze_resume(
             detail=f"Analysis Error: {str(e)}"
         )
 
+class OptimizeBulletsRequest(BaseModel):
+    bullets: list[str]
+
+@app.post("/api/optimize-bullets")
+async def optimize_bullets(request: OptimizeBulletsRequest):
+    optimized = []
+    weak_verbs = {"worked", "helped", "assisted", "did", "made", "got", "had", "used", "tried", "went", "handled", "dealt", "involved", "responsible", "participated", "contributed"}
+    
+    verb_mappings = {
+        "worked": ["Implemented", "Architected", "Spearheaded"],
+        "helped": ["Collaborated on", "Facilitated", "Partnered in"],
+        "assisted": ["Coordinated", "Supported", "Managed"],
+        "did": ["Executed", "Engineered", "Launched"],
+        "made": ["Designed", "Created", "Formulated"],
+        "got": ["Acquired", "Obtained", "Secured"],
+        "had": ["Possessed", "Maintained", "Directed"],
+        "used": ["Leveraged", "Utilized", "Deployed"],
+        "handled": ["Orchestrated", "Steered", "Managed"],
+        "responsible": ["Led", "Spearheaded", "Directed"],
+        "participated": ["Collaborated on", "Engaged in", "Partnered in"],
+        "contributed": ["Enhanced", "Bolstered", "Optimized"]
+    }
+    
+    for bullet in request.bullets:
+        bullet = bullet.strip()
+        if not bullet:
+            continue
+            
+        words = bullet.split()
+        first_word = words[0].lower().rstrip(",") if words else ""
+        
+        is_weak = first_word in weak_verbs
+        has_metrics = any(char.isdigit() for char in bullet)
+        
+        status = "strong"
+        reason = "Excellent bullet point! Uses a strong action verb and includes key metrics."
+        suggestions = []
+        
+        if is_weak or not has_metrics:
+            status = "weak"
+            reasons = []
+            if is_weak:
+                reasons.append(f"Uses a weak starting verb '{first_word}'")
+            if not has_metrics:
+                reasons.append("Lacks quantifiable metrics/numbers (e.g. %, $, or size of impact)")
+            reason = " and ".join(reasons) + "."
+            
+            mapped_verbs = verb_mappings.get(first_word, ["Engineered", "Optimized", "Delivered"])
+            rest_of_bullet = " ".join(words[1:]) if len(words) > 1 else "critical features"
+            
+            # Suggestion 1: Strong verb + Metric
+            suggestions.append(f"{mapped_verbs[0]} {rest_of_bullet}, resulting in a 25% efficiency improvement.")
+            # Suggestion 2: Advanced architectural/business focus
+            suggestions.append(f"{mapped_verbs[1]} {rest_of_bullet} across cross-functional teams, serving over 5,000 users.")
+            
+        optimized.append({
+            "original": bullet,
+            "status": status,
+            "reason": reason,
+            "suggestions": suggestions
+        })
+        
+    return {"optimized": optimized}
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
