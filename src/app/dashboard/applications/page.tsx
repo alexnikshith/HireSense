@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, Calendar, CheckCircle2, XCircle, ExternalLink, Trash2, Search, Sparkles } from "lucide-react";
+import { Clock, Calendar, CheckCircle2, XCircle, ExternalLink, Trash2, Search, Sparkles, Briefcase } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface AppliedJob {
