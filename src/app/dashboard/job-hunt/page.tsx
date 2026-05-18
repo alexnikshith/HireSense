@@ -15,7 +15,7 @@ export default function JobHuntPage() {
     setError("");
     try {
       const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
-      const apiQuery = searchQuery.trim() === "" ? "software engineering" : searchQuery;
+      const apiQuery = searchQuery.trim() === "" ? "software engineering in India" : searchQuery;
       const res = await fetch(`${baseUrl}/api/jobs?query=${encodeURIComponent(apiQuery)}&page=1`);
       const data = await res.json();
       
