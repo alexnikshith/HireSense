@@ -79,8 +79,8 @@ async def get_jobs(query: str = "developer", page: int = 1):
     if api_key == "YOUR_RAPIDAPI_KEY":
         raise HTTPException(status_code=500, detail="RapidAPI Key not configured in backend!")
         
-    url = "https://jsearch.p.rapidapi.com/search-v2"
-    querystring = {"query": query, "page": str(page), "num_pages": "2"}
+    url = "https://jsearch.p.rapidapi.com/search"
+    querystring = {"query": query, "page": str(page), "num_pages": "1"}
     headers = {
         "x-rapidapi-key": api_key,
         "x-rapidapi-host": "jsearch.p.rapidapi.com"
