@@ -6,7 +6,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import uvicorn
+import razorpay
 
 # Absolute imports for Vercel stability
 try:
@@ -44,6 +46,31 @@ suggester = SuggestionsEngine()
 @app.get("/health")
 async def health():
     return {"status": "healthy", "version": "1.2.0"}
+
+class OrderRequest(BaseModel):
+    amount: int
+    currency: str = "INR"
+
+@app.post("/api/create-order")
+async def create_order(request: OrderRequest):
+    key_id = os.environ.get("RAZORPAY_KEY_ID", "rzp_test_Sqi4HlmtjalojS")
+    key_secret = os.environ.get("RAZORPAY_KEY_SECRET", "YOUR_TEST_KEY_SECRET_HERE")
+    
+    if key_secret == "YOUR_TEST_KEY_SECRET_HERE":
+        raise HTTPException(status_code=500, detail="Razorpay Secret Key not configured in backend! Please add RAZORPAY_KEY_SECRET to your environment variables.")
+        
+    client = razorpay.Client(auth=(key_id, key_secret))
+    data = {
+        "amount": request.amount,
+        "currency": request.currency,
+        "receipt": "receipt_1"
+    }
+    
+    try:
+        order = client.order.create(data=data)
+        return {"order_id": order["id"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Razorpay Error: {str(e)}")
 
 @app.post("/api/analyze")
 @app.post("/analyze")

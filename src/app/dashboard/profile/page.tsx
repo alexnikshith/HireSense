@@ -62,12 +62,30 @@ export default function ProfilePage() {
       return;
     }
 
+    // Fetch order ID from backend
+    const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+    let orderId = "";
+    try {
+      const orderRes = await fetch(`${baseUrl}/api/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: amount })
+      });
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) throw new Error(orderData.detail || "Failed to create order");
+      orderId = orderData.order_id;
+    } catch (e: any) {
+      alert(`Backend Error: ${e.message}`);
+      return;
+    }
+
     const options = {
       key: "rzp_test_Sqi4HlmtjalojS", // User's Razorpay Test Key
       amount: amount * 100, // Amount in paise
       currency: "INR",
       name: "HireSense",
       description: `${creditsToAdd} N Credits`,
+      order_id: orderId,
       handler: function (response: any) {
         // Payment successful (Frontend simulation of backend verification)
         const current = parseInt(localStorage.getItem("user_credits") || "400");
