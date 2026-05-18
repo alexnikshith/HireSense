@@ -8,6 +8,7 @@ export default function ProfilePage() {
   const [email, setEmail] = useState("");
   const [saved, setSaved] = useState(false);
   const [showPayment, setShowPayment] = useState<string | null>(null);
+  const [utr, setUtr] = useState("");
   const [credits, setCredits] = useState<number>(400);
   const [activePlan, setActivePlan] = useState<string>("free");
 
@@ -39,6 +40,15 @@ export default function ProfilePage() {
   };
 
   const handleSimulatePayment = (amountToAdd: number, planId: string) => {
+    if (planId !== "free" && utr.length < 12) {
+      alert("Please enter a valid 12-digit UTR/Transaction ID to verify your payment.");
+      return;
+    }
+
+    if (planId !== "free") {
+      alert(`Payment verification pending for UTR: ${utr}. In a real app, an admin would verify this before adding credits! For now, we will add them instantly for testing.`);
+    }
+
     const current = parseInt(localStorage.getItem("user_credits") || "400");
     const updated = current + amountToAdd;
     localStorage.setItem("user_credits", updated.toString());
@@ -47,7 +57,8 @@ export default function ProfilePage() {
     setActivePlan(planId);
     window.dispatchEvent(new Event("credits_updated"));
     setShowPayment(null);
-    alert(`Successfully added ${amountToAdd} credits!`);
+    setUtr("");
+    if (planId === "free") alert("Successfully claimed Free Plan!");
   };
   return (
     <div className="p-8 space-y-10 max-w-4xl">
@@ -114,30 +125,44 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Payment Modal/Section */}
+      {/* Payment Modal Overlay */}
       {showPayment && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 rounded-[2.5rem] border border-primary/50 mt-8 space-y-6">
-          <h3 className="text-2xl font-bold text-primary">Complete Your Payment</h3>
-          <p className="text-muted-foreground">
-            You are purchasing the <strong className="text-white">{showPayment === "standard" ? "Standard Plan (450 Credits)" : "Pro Plan (900 Credits)"}</strong>.
-          </p>
-          <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
-            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2">Pay via UPI</p>
-            <p className="text-2xl font-mono tracking-wider">7569778915@axl</p>
-            <p className="text-xs text-muted-foreground mt-4">Please complete the payment using any UPI app (GPay, PhonePe, Paytm). After successful payment, your credits will be updated shortly.</p>
-          </div>
-          <div className="flex gap-4 pt-4">
-            <button onClick={() => setShowPayment(null)} className="flex-1 py-3 bg-white/10 text-white rounded-2xl font-bold text-sm hover:bg-white/20 transition-all">
-              Cancel
-            </button>
-            <button 
-              onClick={() => handleSimulatePayment(showPayment === "standard" ? 450 : 900, showPayment as string)} 
-              className="flex-1 py-3 bg-green-500 text-white rounded-2xl font-bold text-sm shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 transition-all"
-            >
-              I Have Paid
-            </button>
-          </div>
-        </motion.div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card bg-[#0A0A0A] p-8 rounded-[2.5rem] border border-primary/50 max-w-md w-full space-y-6 shadow-2xl">
+            <h3 className="text-2xl font-bold text-primary">Complete Your Payment</h3>
+            <p className="text-muted-foreground">
+              You are purchasing the <strong className="text-white">{showPayment === "standard" ? "Standard Plan (450 Credits)" : "Pro Plan (900 Credits)"}</strong>.
+            </p>
+            <div className="p-6 bg-white/5 rounded-2xl border border-white/10 text-center space-y-2">
+              <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Pay via UPI</p>
+              <p className="text-2xl font-mono tracking-wider font-bold">7569778915@axl</p>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">UTR / Transaction ID</label>
+              <input 
+                type="text" 
+                value={utr}
+                onChange={(e) => setUtr(e.target.value)}
+                placeholder="Enter 12-digit UTR..." 
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:border-primary/50 transition-all" 
+              />
+              <p className="text-[10px] text-muted-foreground mt-1 ml-1">After transferring, paste the 12-digit reference number here for verification.</p>
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <button onClick={() => setShowPayment(null)} className="flex-1 py-3 bg-white/10 text-white rounded-2xl font-bold text-sm hover:bg-white/20 transition-all">
+                Cancel
+              </button>
+              <button 
+                onClick={() => handleSimulatePayment(showPayment === "standard" ? 450 : 900, showPayment as string)} 
+                className="flex-1 py-3 bg-green-500 text-white rounded-2xl font-bold text-sm shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 transition-all"
+              >
+                Verify & Submit
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );
