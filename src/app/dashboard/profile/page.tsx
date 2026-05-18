@@ -9,10 +9,12 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [showPayment, setShowPayment] = useState<string | null>(null);
   const [credits, setCredits] = useState<number>(400);
+  const [activePlan, setActivePlan] = useState<string>("free");
 
   useEffect(() => {
     setName(localStorage.getItem("user_name") || "");
     setEmail(localStorage.getItem("user_email") || "");
+    setActivePlan(localStorage.getItem("active_plan") || "free");
     
     const storedCredits = localStorage.getItem("user_credits");
     if (storedCredits) {
@@ -36,11 +38,13 @@ export default function ProfilePage() {
     setShowPayment(plan);
   };
 
-  const handleSimulatePayment = (amountToAdd: number) => {
+  const handleSimulatePayment = (amountToAdd: number, planId: string) => {
     const current = parseInt(localStorage.getItem("user_credits") || "400");
     const updated = current + amountToAdd;
     localStorage.setItem("user_credits", updated.toString());
+    localStorage.setItem("active_plan", planId);
     setCredits(updated);
+    setActivePlan(planId);
     window.dispatchEvent(new Event("credits_updated"));
     setShowPayment(null);
     alert(`Successfully added ${amountToAdd} credits!`);
@@ -79,8 +83,8 @@ export default function ProfilePage() {
             <p className="text-3xl font-bold">₹0</p>
             <p className="text-muted-foreground text-xs">Add 400 N Credits to your account.</p>
           </div>
-          <button onClick={() => handleSimulatePayment(400)} className="mt-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm transition-all">
-            Claim Free
+          <button disabled={activePlan === "free"} onClick={() => handleSimulatePayment(400, "free")} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "free" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-white/10 hover:bg-white/20 text-white"}`}>
+            {activePlan === "free" ? "Current Plan" : "Claim Free"}
           </button>
         </div>
 
@@ -91,8 +95,8 @@ export default function ProfilePage() {
             <p className="text-3xl font-bold">₹500</p>
             <p className="text-muted-foreground text-xs">Add 450 N Credits to your account.</p>
           </div>
-          <button onClick={() => handleBuyCredits("standard")} className="mt-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-sm transition-all">
-            Buy Now
+          <button disabled={activePlan === "standard"} onClick={() => handleBuyCredits("standard")} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "standard" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-white/10 hover:bg-white/20 text-white"}`}>
+            {activePlan === "standard" ? "Current Plan" : "Buy Now"}
           </button>
         </div>
 
@@ -104,8 +108,8 @@ export default function ProfilePage() {
             <p className="text-3xl font-bold">₹1000</p>
             <p className="text-muted-foreground text-xs">Add 900 N Credits to your account.</p>
           </div>
-          <button onClick={() => handleBuyCredits("pro")} className="mt-6 py-2.5 bg-primary text-white rounded-xl font-bold text-sm shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all">
-            Buy Now
+          <button disabled={activePlan === "pro"} onClick={() => handleBuyCredits("pro")} className={`mt-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activePlan === "pro" ? "bg-white/5 text-muted-foreground cursor-not-allowed" : "bg-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:scale-[1.02]"}`}>
+            {activePlan === "pro" ? "Current Plan" : "Buy Now"}
           </button>
         </div>
       </div>
@@ -127,7 +131,7 @@ export default function ProfilePage() {
               Cancel
             </button>
             <button 
-              onClick={() => handleSimulatePayment(showPayment === "standard" ? 450 : 900)} 
+              onClick={() => handleSimulatePayment(showPayment === "standard" ? 450 : 900, showPayment as string)} 
               className="flex-1 py-3 bg-green-500 text-white rounded-2xl font-bold text-sm shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 transition-all"
             >
               I Have Paid
