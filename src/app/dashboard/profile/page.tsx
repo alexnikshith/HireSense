@@ -63,7 +63,7 @@ export default function ProfilePage() {
     }
 
     const options = {
-      key: "rzp_test_Sqi4HlmtjaloJS", // User's Razorpay Test Key
+      key: "rzp_test_Sqi4HlmtjalojS", // User's Razorpay Test Key
       amount: amount * 100, // Amount in paise
       currency: "INR",
       name: "HireSense",
