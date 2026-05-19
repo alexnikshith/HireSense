@@ -1,7 +1,13 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/signup/page": "app/signup/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/dashboard/alter-resume/page": "app/dashboard/alter-resume/page.js",
   "/dashboard/applications/page": "app/dashboard/applications/page.js",
-  "/dashboard/resumes/page": "app/dashboard/resumes/page.js",
-  "/dashboard/profile/page": "app/dashboard/profile/page.js"
+  "/dashboard/analytics/page": "app/dashboard/analytics/page.js",
+  "/dashboard/job-hunt/page": "app/dashboard/job-hunt/page.js",
+  "/dashboard/profile/page": "app/dashboard/profile/page.js",
+  "/dashboard/resumes/page": "app/dashboard/resumes/page.js"
 }
