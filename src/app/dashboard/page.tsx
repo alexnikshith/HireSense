@@ -62,6 +62,15 @@ export default function DashboardPage() {
       window.dispatchEvent(new Event("credits_updated"));
 
       setResult(data);
+      localStorage.setItem("last_analysis_result", JSON.stringify(data));
+      
+      // Auto-log this file under user_resumes_list if empty
+      const stored = localStorage.getItem("user_resumes_list");
+      const existingResumes = stored ? JSON.parse(stored) : [];
+      if (!existingResumes.some((r: any) => r.name === selectedFile.name)) {
+        const updated = [...existingResumes, { name: selectedFile.name, type: "Uploaded" }];
+        localStorage.setItem("user_resumes_list", JSON.stringify(updated));
+      }
     } catch (err: any) {
       setError(err.message || "An error occurred during analysis.");
     } finally {

@@ -2,11 +2,18 @@
 
 import { motion } from "framer-motion";
 import { FileText, Plus, MoreVertical } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function ResumesPage() {
   const [resumes, setResumes] = useState<{name: string, type: string}[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("user_resumes_list");
+    if (stored) {
+      setResumes(JSON.parse(stored));
+    }
+  }, []);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -14,7 +21,9 @@ export default function ResumesPage() {
         name: e.target.files[0].name,
         type: "Uploaded"
       };
-      setResumes([...resumes, newResume]);
+      const updated = [...resumes, newResume];
+      setResumes(updated);
+      localStorage.setItem("user_resumes_list", JSON.stringify(updated));
     }
   };
   return (
