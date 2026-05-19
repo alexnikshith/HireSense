@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, AlertCircle } from "lucide-react";
+import { Sparkles, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -16,24 +17,30 @@ export default function LoginPage() {
     e.preventDefault();
     
     if (!username.trim() || !password.trim()) {
-      setError("Please enter both username and password.");
+      setError("Please enter both username/email and password.");
       return;
     }
 
     const savedUser = localStorage.getItem("auth_username");
+    const savedEmail = localStorage.getItem("user_email");
     const savedPass = localStorage.getItem("auth_password");
 
-    if (!savedUser) {
+    // If both are missing, the user has not signed up
+    if (!savedUser && !savedEmail) {
       setError("User does not exist. Please sign up first.");
       return;
     }
 
-    if (username === savedUser && password === savedPass) {
+    // Accept EITHER the username OR the email
+    const isUsernameMatch = username.trim().toLowerCase() === (savedUser || "").toLowerCase();
+    const isEmailMatch = username.trim().toLowerCase() === (savedEmail || "").toLowerCase();
+
+    if ((isUsernameMatch || isEmailMatch) && password === savedPass) {
       // Login successful
-      localStorage.setItem("user_name", username);
+      localStorage.setItem("user_name", savedUser || username);
       router.push("/dashboard");
     } else {
-      setError("Incorrect username or password.");
+      setError("Incorrect username/email or password.");
     }
   };
 
@@ -43,29 +50,38 @@ export default function LoginPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md space-y-8 relative z-10">
         <div className="text-center space-y-4">
           <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-md"><Sparkles className="text-primary-foreground" /></div>
-          <h1 className="text-4xl font-bold">Welcome Back</h1>
+          <h1 className="text-4xl font-bold text-foreground">Welcome Back</h1>
         </div>
-        <div className="glass-card p-8 rounded-[2.5rem] space-y-6">
+        <div className="glass-card p-8 rounded-[2.5rem] space-y-6 bg-white border border-border shadow-sm">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Username</label>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Username or Email</label>
               <input 
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="johndoe" 
+                placeholder="Enter username or email" 
                 className="w-full bg-transparent border border-border rounded-2xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-primary transition-all" 
               />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Password</label>
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••" 
-                className="w-full bg-transparent border border-border rounded-2xl py-3 px-4 text-sm text-foreground focus:outline-none focus:border-primary transition-all" 
-              />
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••" 
+                  className="w-full bg-transparent border border-border rounded-2xl py-3 pl-4 pr-12 text-sm text-foreground focus:outline-none focus:border-primary transition-all" 
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
           </div>
           
