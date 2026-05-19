@@ -61,3 +61,8 @@ Renders skill metrics dynamically from parsed local state.
 ## 12. Profile Claim workflows
 
 Synchronizes saved data profiles and claims free allowances on mount.
+
+
+## 13. Troubleshooting & FAQ
+
+Covers server dependency resolutions and deployment pipeline fixes.
