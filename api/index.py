@@ -26,7 +26,7 @@ except Exception as _e:
             raise Exception(f"Backend failed to initialize. Error: {err_msg}")
     ResumeParser = NLPEngine = JobMatcher = ATSScorer = SuggestionsEngine = Dummy
 
-app = FastAPI(title="HireSense AI API")
+app = FastAPI(title="Talent Scope AI API")
 
 # Enable CORS
 app.add_middleware(
