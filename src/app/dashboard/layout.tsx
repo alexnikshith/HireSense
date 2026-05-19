@@ -57,10 +57,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex flex-col min-h-screen bg-background text-foreground font-sans">
       {/* Top Header - Maroon Theme */}
       <header className="bg-primary text-primary-foreground py-3 px-6 flex justify-between items-center shadow-md z-10 relative">
-        <div className="flex items-center gap-3">
+        <button 
+          onClick={() => {
+            window.location.reload();
+          }}
+          className="flex items-center gap-3 hover:opacity-90 active:scale-[0.98] transition-all focus:outline-none"
+        >
           <Sparkles size={22} className="text-white" />
           <span className="text-xl font-bold tracking-wide">HireSense</span>
-        </div>
+        </button>
 
         <div className="flex items-center gap-4">
           {/* N Credits Widget */}
