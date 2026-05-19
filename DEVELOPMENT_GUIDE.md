@@ -31,3 +31,8 @@ Computes matches based on word density, keyword matching, and readability index.
 ## 6. Suggestions Engine Rules
 
 Provides priority actions for improving resume formatting and spelling.
+
+
+## 7. NLP Tokenization Architecture
+
+Utilizes custom scanners to tokenize resumes and identify matching fields.
