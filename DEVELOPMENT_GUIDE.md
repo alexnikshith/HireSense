@@ -66,3 +66,8 @@ Synchronizes saved data profiles and claims free allowances on mount.
 ## 13. Troubleshooting & FAQ
 
 Covers server dependency resolutions and deployment pipeline fixes.
+
+
+## 14. License & Contribution Guidelines
+
+HireSense is licensed under standard developer terms.
