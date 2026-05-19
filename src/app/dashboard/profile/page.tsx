@@ -70,7 +70,7 @@ export default function ProfilePage() {
       key: "rzp_test_Sqi4HlmtjalojS", // Publicly active Razorpay Test Key ID
       amount: amount * 100, // Amount in paise
       currency: "INR",
-      name: "HireSense AI",
+      name: "Talent Scope AI",
       description: `Upgrade to ${planId.toUpperCase()} - Add ${creditsToAdd} Credits`,
       image: "https://cdn-icons-png.flaticon.com/512/2092/2092663.png",
       handler: function (response: any) {

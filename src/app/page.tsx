@@ -22,8 +22,8 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl bg-white/80 backdrop-blur-md shadow-sm border border-border rounded-2xl px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="HireSense Logo" className="w-8 h-8 rounded-lg object-contain border border-border" />
-          <span className="text-xl font-bold text-foreground">HireSense</span>
+          <img src="/logo.png" alt="Talent Scope Logo" className="w-8 h-8 rounded-lg object-contain border border-border" />
+          <span className="text-xl font-bold text-foreground">Talent Scope</span>
         </div>
         <div className="hidden md:flex gap-8 text-sm font-medium text-muted-foreground">
           <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
@@ -95,7 +95,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="relative z-10 py-12 border-t border-border container px-6 mx-auto flex justify-between items-center text-sm text-muted-foreground">
-        <div className="flex items-center gap-2 font-bold text-foreground"><Sparkles size={16} className="text-primary" /> HireSense AI</div>
+        <div className="flex items-center gap-2 font-bold text-foreground"><Sparkles size={16} className="text-primary" /> Talent Scope AI</div>
         <div>© 2024. All rights reserved.</div>
       </footer>
     </div>

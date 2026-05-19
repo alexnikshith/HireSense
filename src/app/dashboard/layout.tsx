@@ -63,8 +63,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           }}
           className="flex items-center gap-3 hover:opacity-90 active:scale-[0.98] transition-all focus:outline-none"
         >
-          <img src="/logo.png" alt="HireSense Logo" className="w-8 h-8 rounded-lg object-contain border border-white/10" />
-          <span className="text-xl font-bold tracking-wide">HireSense</span>
+          <img src="/logo.png" alt="Talent Scope Logo" className="w-8 h-8 rounded-lg object-contain border border-white/10" />
+          <span className="text-xl font-bold tracking-wide">Talent Scope</span>
         </button>
 
         <div className="flex items-center gap-4">

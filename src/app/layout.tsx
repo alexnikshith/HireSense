@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "HireSense | Premium AI Resume Intelligence",
+  title: "Talent Scope | Premium AI Resume Intelligence",
   description: "Optimize your career with the top 1% of AI hiring tools.",
   icons: {
     icon: [
