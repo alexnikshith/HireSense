@@ -56,3 +56,8 @@ Uses client-side standard overlay checkouts for reliable Sandbox/Live test mode.
 ## 11. Dynamic Analytics Graphics
 
 Renders skill metrics dynamically from parsed local state.
+
+
+## 12. Profile Claim workflows
+
+Synchronizes saved data profiles and claims free allowances on mount.
