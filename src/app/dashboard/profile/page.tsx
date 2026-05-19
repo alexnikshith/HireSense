@@ -56,15 +56,11 @@ export default function ProfilePage() {
       return;
     }
 
-    const res = await loadRazorpay();
-    if (!res) {
-      alert("Razorpay SDK failed to load. Please check your internet connection.");
-      return;
-    }
-
-    // Fetch order ID from backend
+    // 1. Fetch order ID from backend first to check if keys are configured
     const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
     let orderId = "";
+    let isMock = false;
+    
     try {
       const orderRes = await fetch(`${baseUrl}/api/create-order`, {
         method: "POST",
@@ -74,8 +70,34 @@ export default function ProfilePage() {
       const orderData = await orderRes.json();
       if (!orderRes.ok) throw new Error(orderData.detail || "Failed to create order");
       orderId = orderData.order_id;
+      isMock = !!orderData.is_mock;
     } catch (e: any) {
       alert(`Backend Error: ${e.message}`);
+      return;
+    }
+
+    // 2. If backend is in sandbox mode, trigger a seamless test checkout simulation
+    if (isMock) {
+      const confirmed = window.confirm(
+        `💳 HireSense Premium Sandbox Mode\n\nNo Razorpay environment keys are configured on the server.\n\nWould you like to simulate a successful payment of ₹${amount} and instantly credit +${creditsToAdd} N Credits to your account?`
+      );
+      if (confirmed) {
+        const current = parseInt(localStorage.getItem("user_credits") || "400");
+        const updated = current + creditsToAdd;
+        localStorage.setItem("user_credits", updated.toString());
+        localStorage.setItem("active_plan", planId);
+        setCredits(updated);
+        setActivePlan(planId);
+        window.dispatchEvent(new Event("credits_updated"));
+        alert(`🎉 Sandbox Checkout Successful!\n\nAdded ${creditsToAdd} N Credits to your account. Enjoy your new features!`);
+      }
+      return;
+    }
+
+    // 3. Fall back to real Razorpay checkout if keys are live
+    const sdkLoaded = await loadRazorpay();
+    if (!sdkLoaded) {
+      alert("Razorpay SDK failed to load. Please check your internet connection.");
       return;
     }
 
