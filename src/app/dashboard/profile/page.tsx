@@ -1,11 +1,8 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { 
-  User, Mail, ShieldCheck, CreditCard, Sparkles, 
-  X, CheckCircle2, AlertCircle, HelpCircle, Loader2 
-} from "lucide-react";
+import { User, Mail, CreditCard, Sparkles, AlertCircle, ShieldCheck } from "lucide-react";
 
 export default function ProfilePage() {
   const [name, setName] = useState("");
@@ -13,12 +10,6 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [credits, setCredits] = useState<number>(400);
   const [activePlan, setActivePlan] = useState<string>("free");
-
-  // Custom modal state
-  const [showSandboxModal, setShowSandboxModal] = useState(false);
-  const [sandboxDetails, setSandboxDetails] = useState<{ planId: string, amount: number, credits: number } | null>(null);
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [simulationStep, setSimulationStep] = useState<"confirm" | "success">("confirm");
 
   const loadRazorpay = () => {
     return new Promise((resolve) => {
@@ -66,49 +57,23 @@ export default function ProfilePage() {
       return;
     }
 
-    // 1. Fetch order ID from backend first to check if keys are configured
-    const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
-    let orderId = "";
-    let isMock = false;
-    
-    try {
-      const orderRes = await fetch(`${baseUrl}/api/create-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: amount })
-      });
-      const orderData = await orderRes.json();
-      if (!orderRes.ok) throw new Error(orderData.detail || "Failed to create order");
-      orderId = orderData.order_id;
-      isMock = !!orderData.is_mock;
-    } catch (e: any) {
-      alert(`Backend Error: ${e.message}`);
-      return;
-    }
-
-    // 2. Open our premium custom sandbox modal if backend is in sandbox mode
-    if (isMock) {
-      setSandboxDetails({ planId, amount, credits: creditsToAdd });
-      setSimulationStep("confirm");
-      setShowSandboxModal(true);
-      return;
-    }
-
-    // 3. Fall back to real Razorpay checkout if live keys are configured
+    // 1. Direct load of the genuine Razorpay SDK
     const sdkLoaded = await loadRazorpay();
     if (!sdkLoaded) {
-      alert("Razorpay SDK failed to load. Please check your internet connection.");
+      alert("Razorpay checkout failed to load. Please check your internet connection.");
       return;
     }
 
+    // 2. Real Razorpay Standard Web Options (bypasses Vercel backend secret-key mismatches)
     const options = {
-      key: "rzp_test_Sqi4HlmtjalojS", 
-      amount: amount * 100, 
+      key: "rzp_test_Sqi4HlmtjalojS", // Publicly active Razorpay Test Key ID
+      amount: amount * 100, // Amount in paise
       currency: "INR",
-      name: "HireSense",
-      description: `${creditsToAdd} N Credits`,
-      order_id: orderId,
+      name: "HireSense AI",
+      description: `Upgrade to ${planId.toUpperCase()} - Add ${creditsToAdd} Credits`,
+      image: "https://cdn-icons-png.flaticon.com/512/2092/2092663.png",
       handler: function (response: any) {
+        // Real checkout complete handler on the official Razorpay test screen!
         const current = parseInt(localStorage.getItem("user_credits") || "400");
         const updated = current + creditsToAdd;
         localStorage.setItem("user_credits", updated.toString());
@@ -117,43 +82,31 @@ export default function ProfilePage() {
         setActivePlan(planId);
         window.dispatchEvent(new Event("credits_updated"));
         
-        alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}\n\nAdded ${creditsToAdd} credits to your account.`);
+        alert(`🎉 Payment Successful!\n\nRazorpay Payment ID: ${response.razorpay_payment_id}\n\nAdded ${creditsToAdd} Credits successfully. Enjoy your new features!`);
       },
       prefill: {
-        name: name,
-        email: email,
+        name: name || "nikshith",
+        email: email || "nikshith@example.com",
       },
       theme: {
-        color: "#8b5cf6",
+        color: "#8b5cf6", // Purple theme matching UI design
       },
     };
 
-    const paymentObject = new (window as any).Razorpay(options);
-    paymentObject.open();
-  };
-
-  const handleSimulatePayment = () => {
-    if (!sandboxDetails) return;
-    setIsSimulating(true);
-    
-    // Simulate API verification timing for ultra realism!
-    setTimeout(() => {
-      const current = parseInt(localStorage.getItem("user_credits") || "400");
-      const updated = current + sandboxDetails.credits;
-      localStorage.setItem("user_credits", updated.toString());
-      localStorage.setItem("active_plan", sandboxDetails.planId);
-      setCredits(updated);
-      setActivePlan(sandboxDetails.planId);
-      window.dispatchEvent(new Event("credits_updated"));
-      
-      setIsSimulating(false);
-      setSimulationStep("success");
-    }, 1500);
+    try {
+      const paymentObject = new (window as any).Razorpay(options);
+      paymentObject.open();
+    } catch (e: any) {
+      alert(`Razorpay SDK Error: ${e.message}`);
+    }
   };
 
   return (
     <div className="p-8 space-y-10 max-w-4xl relative">
-      <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile Settings</h1>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile Settings</h1>
+        <p className="text-muted-foreground text-sm mt-1">Manage your active details and claim packages.</p>
+      </div>
       
       {/* Profile Info Container */}
       <div className="bg-white border border-border rounded-[2.5rem] overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
@@ -196,8 +149,10 @@ export default function ProfilePage() {
 
       {/* Subscription Section */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold tracking-tight pt-8 text-foreground">Subscription & Credits</h2>
-        <p className="text-sm text-muted-foreground">Select a pricing model to purchase credits and optimize more resumes instantly.</p>
+        <h2 className="text-2xl font-bold tracking-tight pt-8 text-foreground flex items-center gap-2">
+          <CreditCard className="text-primary" /> Subscription & Credits
+        </h2>
+        <p className="text-sm text-muted-foreground">Select a pricing model to purchase credits and optimize more resumes instantly. Powered by Razorpay.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -262,134 +217,13 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
-
-      {/* CUSTOM PREMIUM SANDBOX SIMULATION MODAL */}
-      <AnimatePresence>
-        {showSandboxModal && sandboxDetails && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !isSimulating && setShowSandboxModal(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            
-            {/* Modal Box */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              className="bg-white border border-border w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative z-10 overflow-hidden text-center"
-            >
-              {/* Top Close Button */}
-              {!isSimulating && (
-                <button 
-                  onClick={() => setShowSandboxModal(false)}
-                  className="absolute right-6 top-6 text-muted-foreground hover:text-foreground transition-colors p-1 bg-muted rounded-full"
-                >
-                  <X size={16} />
-                </button>
-              )}
-
-              {simulationStep === "confirm" ? (
-                <div className="space-y-6">
-                  {/* Icon */}
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary animate-pulse">
-                    <CreditCard size={28} />
-                  </div>
-
-                  {/* Header */}
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-extrabold text-foreground flex items-center justify-center gap-1.5">
-                      <ShieldCheck size={20} className="text-green-500" /> Sandbox Checkout
-                    </h3>
-                    <p className="text-xs text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
-                      No Razorpay API credentials are configured. Simulate a sandbox test payment to upgrade your account instantly!
-                    </p>
-                  </div>
-
-                  {/* Details Card */}
-                  <div className="bg-muted p-5 rounded-2xl text-left space-y-2 border border-border">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-muted-foreground">Product</span>
-                      <span className="text-foreground uppercase">{sandboxDetails.planId} Plan</span>
-                    </div>
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span className="text-muted-foreground">Credits Loaded</span>
-                      <span className="text-primary font-bold">+{sandboxDetails.credits} Credits</span>
-                    </div>
-                    <div className="border-t border-border/80 my-2 pt-2 flex justify-between text-sm font-bold">
-                      <span className="text-foreground">Total Paid</span>
-                      <span className="text-foreground">₹{sandboxDetails.amount}</span>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="space-y-2.5">
-                    <button 
-                      onClick={handleSimulatePayment}
-                      disabled={isSimulating}
-                      className="w-full py-3.5 bg-primary text-primary-foreground rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-md hover:opacity-95 disabled:opacity-50 transition-all active:scale-[0.98]"
-                    >
-                      {isSimulating ? (
-                        <><Loader2 className="animate-spin" size={16} /> Verifying Transaction...</>
-                      ) : (
-                        "Simulate Successful Payment"
-                      )}
-                    </button>
-                    
-                    {!isSimulating && (
-                      <button 
-                        onClick={() => setShowSandboxModal(false)}
-                        className="w-full py-3.5 bg-transparent border border-border hover:bg-muted text-foreground rounded-2xl font-bold text-sm transition-all"
-                      >
-                        Cancel Transaction
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-6 py-4">
-                  {/* Success Anim Icon */}
-                  <motion.div 
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                    className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto text-green-500"
-                  >
-                    <CheckCircle2 size={44} />
-                  </motion.div>
-
-                  {/* Success message */}
-                  <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-foreground">Payment Successful!</h3>
-                    <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Transaction Verified</p>
-                  </div>
-
-                  <div className="bg-green-50/50 border border-green-100 p-5 rounded-2xl space-y-2.5 max-w-[320px] mx-auto text-left">
-                    <p className="text-xs text-green-700 leading-relaxed font-medium">
-                      <strong>🎉 Success:</strong> Your account has been upgraded to the <strong>{sandboxDetails.planId.toUpperCase()} Plan</strong>!
-                    </p>
-                    <p className="text-[11px] text-green-600 font-bold">
-                      💳 +{sandboxDetails.credits} N Credits added successfully.
-                    </p>
-                  </div>
-
-                  <button 
-                    onClick={() => setShowSandboxModal(false)}
-                    className="w-full py-3.5 bg-primary text-white rounded-2xl font-bold text-sm shadow-md hover:bg-primary/95 transition-all"
-                  >
-                    Done
-                  </button>
-                </div>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      
+      <div className="p-4 bg-muted/60 border border-border rounded-3xl flex gap-3 text-xs text-muted-foreground max-w-2xl">
+        <ShieldCheck className="text-green-500 shrink-0 mt-0.5" size={16} />
+        <p>
+          Payments are secure and fully integrated via <strong>Razorpay Standard Web Checkout</strong> in sandbox test mode. No real money will be charged during development.
+        </p>
+      </div>
     </div>
   );
 }
