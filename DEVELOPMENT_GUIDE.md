@@ -26,3 +26,8 @@ Persists resume meta, analysis status, and credentials cleanly.
 ## 5. ATS Scoring Algorithm
 
 Computes matches based on word density, keyword matching, and readability index.
+
+
+## 6. Suggestions Engine Rules
+
+Provides priority actions for improving resume formatting and spelling.
