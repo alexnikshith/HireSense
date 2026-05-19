@@ -36,3 +36,8 @@ Provides priority actions for improving resume formatting and spelling.
 ## 7. NLP Tokenization Architecture
 
 Utilizes custom scanners to tokenize resumes and identify matching fields.
+
+
+## 8. Job Matching Similarity Index
+
+Calculates cosine similarity between parsed resumes and target descriptions.
