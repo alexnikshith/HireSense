@@ -22,14 +22,15 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
+    // Reset test credits back to 400 and plan back to free as requested by the user
+    localStorage.setItem("user_credits", "400");
+    localStorage.setItem("active_plan", "free");
+    setCredits(400);
+    setActivePlan("free");
+    window.dispatchEvent(new Event("credits_updated"));
+    
     setName(localStorage.getItem("user_name") || "");
     setEmail(localStorage.getItem("user_email") || "");
-    setActivePlan(localStorage.getItem("active_plan") || "free");
-    
-    const storedCredits = localStorage.getItem("user_credits");
-    if (storedCredits) {
-      setCredits(parseInt(storedCredits));
-    }
   }, []);
 
   const handleSave = () => {
@@ -164,13 +165,8 @@ export default function ProfilePage() {
             <p className="text-muted-foreground text-xs font-medium">Add 400 N Credits to your account.</p>
           </div>
           <button 
-            disabled={activePlan === "free"} 
             onClick={() => displayRazorpay("free", 0, 400)} 
-            className={`mt-6 py-3 rounded-xl font-bold text-sm transition-all border ${
-              activePlan === "free" 
-              ? "bg-muted text-muted-foreground cursor-not-allowed border-transparent" 
-              : "border-border text-foreground hover:bg-muted active:scale-[0.98]"
-            }`}
+            className="mt-6 py-3 w-full bg-black text-white font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
           >
             {activePlan === "free" ? "Current Plan" : "Claim Free"}
           </button>
@@ -184,13 +180,8 @@ export default function ProfilePage() {
             <p className="text-muted-foreground text-xs font-medium">Add 450 N Credits to your account.</p>
           </div>
           <button 
-            disabled={activePlan === "standard"} 
             onClick={() => displayRazorpay("standard", 500, 450)} 
-            className={`mt-6 py-3 rounded-xl font-bold text-sm transition-all border ${
-              activePlan === "standard" 
-              ? "bg-muted text-muted-foreground cursor-not-allowed border-transparent" 
-              : "border-border text-foreground hover:bg-muted active:scale-[0.98]"
-            }`}
+            className="mt-6 py-3 w-full bg-black text-white font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
           >
             {activePlan === "standard" ? "Current Plan" : "Buy Now"}
           </button>
@@ -205,13 +196,8 @@ export default function ProfilePage() {
             <p className="text-muted-foreground text-xs font-medium">Add 900 N Credits to your account.</p>
           </div>
           <button 
-            disabled={activePlan === "pro"} 
             onClick={() => displayRazorpay("pro", 1000, 900)} 
-            className={`mt-6 py-3 rounded-xl font-bold text-sm transition-all ${
-              activePlan === "pro" 
-              ? "bg-muted text-muted-foreground cursor-not-allowed" 
-              : "bg-primary text-primary-foreground shadow-md hover:opacity-90 active:scale-[0.98]"
-            }`}
+            className="mt-6 py-3 w-full bg-black text-white font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
           >
             {activePlan === "pro" ? "Current Plan" : "Buy Now"}
           </button>
