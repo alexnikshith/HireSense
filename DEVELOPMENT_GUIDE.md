@@ -11,3 +11,8 @@ HireSense utilizes a Next.js frontend with TailwindCSS, and a robust FastAPI bac
 ## 2. Fastapi API Endpoints
 
 The backend supports /api/analyze for NLP parsing and /api/create-order for payments.
+
+
+## 3. Frontend Routing Guide
+
+Contains layout routes for dashboard, job hunt, analytics, and settings.
