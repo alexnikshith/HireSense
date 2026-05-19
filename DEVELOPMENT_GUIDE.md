@@ -16,3 +16,8 @@ The backend supports /api/analyze for NLP parsing and /api/create-order for paym
 ## 3. Frontend Routing Guide
 
 Contains layout routes for dashboard, job hunt, analytics, and settings.
+
+
+## 4. Local Storage Caching Strategy
+
+Persists resume meta, analysis status, and credentials cleanly.
