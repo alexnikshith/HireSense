@@ -41,3 +41,8 @@ Utilizes custom scanners to tokenize resumes and identify matching fields.
 ## 8. Job Matching Similarity Index
 
 Calculates cosine similarity between parsed resumes and target descriptions.
+
+
+## 9. RapidAPI JSearch Integration
+
+Queries live Indian and Global developer roles based on user filters.
