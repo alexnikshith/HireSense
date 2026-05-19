@@ -22,7 +22,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl bg-white/80 backdrop-blur-md shadow-sm border border-border rounded-2xl px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground"><Sparkles size={18} /></div>
+          <img src="/logo.png" alt="HireSense Logo" className="w-8 h-8 rounded-lg object-contain border border-border" />
           <span className="text-xl font-bold text-foreground">HireSense</span>
         </div>
         <div className="hidden md:flex gap-8 text-sm font-medium text-muted-foreground">
