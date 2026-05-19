@@ -51,3 +51,8 @@ Queries live Indian and Global developer roles based on user filters.
 ## 10. Razorpay Standard Checkout
 
 Uses client-side standard overlay checkouts for reliable Sandbox/Live test mode.
+
+
+## 11. Dynamic Analytics Graphics
+
+Renders skill metrics dynamically from parsed local state.
