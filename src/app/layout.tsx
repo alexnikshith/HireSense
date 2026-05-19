@@ -7,7 +7,10 @@ export const metadata = {
   title: "HireSense | Premium AI Resume Intelligence",
   description: "Optimize your career with the top 1% of AI hiring tools.",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+      { url: "/favicon.ico", type: "image/x-icon" }
+    ],
     shortcut: "/favicon.ico",
     apple: "/logo.png",
   },
