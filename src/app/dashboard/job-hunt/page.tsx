@@ -6,7 +6,7 @@ import { Search, MapPin, Briefcase, DollarSign, ExternalLink, Zap, CheckCircle2,
 
 export default function JobHuntPage() {
   const [roleQuery, setRoleQuery] = useState("");
-  const [locationQuery, setLocationQuery] = useState("India");
+  const [locationQuery, setLocationQuery] = useState("");
   const [jobTypeFilter, setJobTypeFilter] = useState("ALL");
   
   const [jobs, setJobs] = useState<any[]>([]);
