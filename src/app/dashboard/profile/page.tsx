@@ -112,6 +112,14 @@ export default function ProfilePage() {
     }
   };
 
+  const getCardStyle = (planId: string) => {
+    const isActive = activePlan === planId;
+    if (isActive) {
+      return "p-6 rounded-[2rem] flex flex-col justify-between border-2 border-primary bg-primary/5 shadow-lg transition-all relative overflow-hidden";
+    }
+    return "bg-white border border-border p-6 rounded-[2rem] flex flex-col justify-between hover:border-primary/50 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)]";
+  };
+
   return (
     <div className="p-8 space-y-10 max-w-4xl relative">
       <div>
@@ -168,8 +176,11 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Free Plan */}
-        <div className="bg-white border border-border p-6 rounded-[2rem] flex flex-col justify-between hover:border-primary/50 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className={getCardStyle("free")}>
           <div className="space-y-3">
+            {activePlan === "free" && (
+              <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1 w-max">CURRENT PLAN</div>
+            )}
             <h3 className="text-lg font-bold text-foreground">Free Plan</h3>
             <p className="text-3xl font-extrabold text-foreground">₹0</p>
             <p className="text-muted-foreground text-xs font-medium">Add 400 N Credits to your account.</p>
@@ -183,8 +194,11 @@ export default function ProfilePage() {
         </div>
 
         {/* Standard Plan */}
-        <div className="bg-white border border-border p-6 rounded-[2rem] flex flex-col justify-between hover:border-primary/50 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className={getCardStyle("standard")}>
           <div className="space-y-3">
+            {activePlan === "standard" && (
+              <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1 w-max">CURRENT PLAN</div>
+            )}
             <h3 className="text-lg font-bold text-foreground">Standard Plan</h3>
             <p className="text-3xl font-extrabold text-foreground">₹500</p>
             <p className="text-muted-foreground text-xs font-medium">Add 450 N Credits to your account.</p>
@@ -198,9 +212,13 @@ export default function ProfilePage() {
         </div>
 
         {/* Pro Plan */}
-        <div className="bg-white p-6 rounded-[2rem] flex flex-col justify-between border-2 border-primary bg-primary/5 shadow-lg transition-all relative overflow-hidden">
+        <div className={getCardStyle("pro")}>
           <div className="space-y-3">
-            <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1">MOST POPULAR</div>
+            {activePlan === "pro" ? (
+              <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1 w-max">CURRENT PLAN</div>
+            ) : (
+              <div className="inline-block px-2.5 py-1 bg-muted text-muted-foreground text-[9px] font-bold rounded-full mb-1 w-max">MOST POPULAR</div>
+            )}
             <h3 className="text-lg font-bold text-foreground">Pro Plan</h3>
             <p className="text-3xl font-extrabold text-foreground">₹1000</p>
             <p className="text-muted-foreground text-xs font-medium">Add 900 N Credits to your account.</p>
