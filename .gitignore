@@ -1,2 +1,9 @@
 .vercel
 node_modules
+.next
+*.pyc
+__pycache__/
+venv/
+.env
+.env.local
+output.txt
