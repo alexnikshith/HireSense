@@ -22,7 +22,7 @@ const menuItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [credits, setCredits] = useState<number>(400);
+  const [credits, setCredits] = useState<number>(900);
 
   useEffect(() => {
     // Check authentication
@@ -34,8 +34,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const stored = localStorage.getItem("user_credits");
     if (!stored) {
-      localStorage.setItem("user_credits", "400");
-      setCredits(400);
+      localStorage.setItem("user_credits", "900");
+      setCredits(900);
     } else {
       setCredits(parseInt(stored));
     }

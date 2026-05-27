@@ -32,8 +32,8 @@ export default function SignupPage() {
     localStorage.setItem("auth_email", cleanEmail);
     localStorage.setItem("user_name", cleanUser);
     localStorage.setItem("user_email", cleanEmail);
-    localStorage.setItem("active_plan", "free");
-    localStorage.setItem("user_credits", "400"); // Standard default N credits
+    localStorage.setItem("active_plan", "pro");
+    localStorage.setItem("user_credits", "900"); // Standard default N credits
 
     router.push("/dashboard");
   };

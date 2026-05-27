@@ -22,11 +22,20 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    // Reset test credits back to 400 and plan back to free as requested by the user
-    localStorage.setItem("user_credits", "400");
-    localStorage.setItem("active_plan", "free");
-    setCredits(400);
-    setActivePlan("free");
+    // Initialize or load credits and plan from local storage
+    const storedPlan = localStorage.getItem("active_plan") || "pro";
+    const storedCredits = localStorage.getItem("user_credits") || "900";
+    
+    // Persist if not already present
+    if (!localStorage.getItem("active_plan")) {
+      localStorage.setItem("active_plan", storedPlan);
+    }
+    if (!localStorage.getItem("user_credits")) {
+      localStorage.setItem("user_credits", storedCredits);
+    }
+
+    setCredits(parseInt(storedCredits));
+    setActivePlan(storedPlan);
     window.dispatchEvent(new Event("credits_updated"));
     
     setName(localStorage.getItem("user_name") || "");
