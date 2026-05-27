@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { User, Mail, CreditCard, Sparkles, AlertCircle, ShieldCheck } from "lucide-react";
 
@@ -10,6 +10,26 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [credits, setCredits] = useState<number>(400);
   const [activePlan, setActivePlan] = useState<string>("free");
+  const [notification, setNotification] = useState<{
+    type: "success" | "error" | "info";
+    title: string;
+    message: string;
+    show: boolean;
+  }>({
+    type: "success",
+    title: "",
+    message: "",
+    show: false,
+  });
+
+  const triggerAlert = (type: "success" | "error" | "info", title: string, message: string) => {
+    setNotification({
+      type,
+      title,
+      message,
+      show: true,
+    });
+  };
 
   const loadRazorpay = () => {
     return new Promise((resolve) => {
@@ -64,14 +84,14 @@ export default function ProfilePage() {
       setCredits(updated);
       setActivePlan(planId);
       window.dispatchEvent(new Event("credits_updated"));
-      alert("Successfully claimed Free Plan!");
+      triggerAlert("success", "Plan Claimed!", "Successfully claimed the Free Plan!");
       return;
     }
 
     // 1. Direct load of the genuine Razorpay SDK
     const sdkLoaded = await loadRazorpay();
     if (!sdkLoaded) {
-      alert("Razorpay checkout failed to load. Please check your internet connection.");
+      triggerAlert("error", "Checkout Failed", "Razorpay checkout failed to load. Please check your internet connection.");
       return;
     }
 
@@ -93,7 +113,7 @@ export default function ProfilePage() {
         setActivePlan(planId);
         window.dispatchEvent(new Event("credits_updated"));
         
-        alert(`🎉 Payment Successful!\n\nRazorpay Payment ID: ${response.razorpay_payment_id}\n\nAdded ${creditsToAdd} Credits successfully. Enjoy your new features!`);
+        triggerAlert("success", "Payment Successful! 🎉", `Razorpay Payment ID: ${response.razorpay_payment_id}\n\nAdded ${creditsToAdd} Credits successfully. Enjoy your new features!`);
       },
       prefill: {
         name: name || "nikshith",
@@ -108,7 +128,7 @@ export default function ProfilePage() {
       const paymentObject = new (window as any).Razorpay(options);
       paymentObject.open();
     } catch (e: any) {
-      alert(`Razorpay SDK Error: ${e.message}`);
+      triggerAlert("error", "Checkout Error", `Razorpay SDK Error: ${e.message}`);
     }
   };
 
@@ -239,5 +259,40 @@ export default function ProfilePage() {
         </p>
       </div>
     </div>
+    
+    <AnimatePresence>
+      {notification.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }} 
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="bg-white border border-border p-8 rounded-[2.5rem] max-w-md w-full shadow-2xl relative space-y-6 text-center"
+          >
+            {notification.type === "success" ? (
+              <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto border border-green-100">
+                <ShieldCheck size={32} />
+              </div>
+            ) : (
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto border border-red-100">
+                <AlertCircle size={32} />
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-foreground">{notification.title}</h3>
+              <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">{notification.message}</p>
+            </div>
+            
+            <button 
+              onClick={() => setNotification({ ...notification, show: false })}
+              className="w-full py-3.5 bg-black text-white hover:opacity-90 active:scale-[0.98] transition-all font-bold text-sm rounded-2xl shadow-md"
+            >
+              Okay
+            </button>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
