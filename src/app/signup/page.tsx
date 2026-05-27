@@ -29,6 +29,7 @@ export default function SignupPage() {
 
     localStorage.setItem("auth_username", cleanUser);
     localStorage.setItem("auth_password", cleanPass);
+    localStorage.setItem("auth_email", cleanEmail);
     localStorage.setItem("user_name", cleanUser);
     localStorage.setItem("user_email", cleanEmail);
     localStorage.setItem("active_plan", "free");

@@ -30,12 +30,13 @@ export default function ProfilePage() {
     window.dispatchEvent(new Event("credits_updated"));
     
     setName(localStorage.getItem("user_name") || "");
-    setEmail(localStorage.getItem("user_email") || "");
+    setEmail(localStorage.getItem("user_email") || localStorage.getItem("auth_email") || "");
   }, []);
 
   const handleSave = () => {
     localStorage.setItem("user_name", name);
     localStorage.setItem("user_email", email);
+    localStorage.setItem("auth_email", email);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

@@ -22,7 +22,7 @@ export default function LoginPage() {
     }
 
     const savedUser = localStorage.getItem("auth_username");
-    const savedEmail = localStorage.getItem("user_email");
+    const savedEmail = localStorage.getItem("auth_email") || localStorage.getItem("user_email");
     const savedPass = localStorage.getItem("auth_password");
 
     // If both are missing, the user has not signed up
@@ -38,6 +38,9 @@ export default function LoginPage() {
     if ((isUsernameMatch || isEmailMatch) && password === savedPass) {
       // Login successful
       localStorage.setItem("user_name", savedUser || username);
+      if (savedEmail) {
+        localStorage.setItem("user_email", savedEmail);
+      }
       router.push("/dashboard");
     } else {
       setError("Incorrect username/email or password.");
