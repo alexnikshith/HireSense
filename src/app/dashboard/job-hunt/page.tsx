@@ -2,10 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, MapPin, Briefcase, DollarSign, ExternalLink, Zap, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
+import { Search, MapPin, Briefcase, DollarSign, ExternalLink, Zap, CheckCircle2, Loader2, RefreshCw, Globe } from "lucide-react";
+
+// Utility helper to map country codes to beautiful human-readable names
+const getCountryName = (code: string) => {
+  if (!code) return "";
+  const countries: { [key: string]: string } = {
+    "IN": "India",
+    "US": "United States",
+    "GB": "United Kingdom",
+    "CA": "Canada",
+    "AU": "Australia",
+    "DE": "Germany",
+    "FR": "France",
+  };
+  return countries[code.toUpperCase()] || code;
+};
 
 export default function JobHuntPage() {
   const [roleQuery, setRoleQuery] = useState("");
+  const [countryFilter, setCountryFilter] = useState("IN");
   const [locationQuery, setLocationQuery] = useState("");
   const [jobTypeFilter, setJobTypeFilter] = useState("ALL");
   
@@ -21,7 +37,22 @@ export default function JobHuntPage() {
       
       // Combine inputs into a clean, searchable JSearch query
       const role = roleQuery.trim() === "" ? "software engineering" : roleQuery.trim();
-      const location = locationQuery.trim() === "" ? "" : ` in ${locationQuery.trim()}`;
+      
+      const countryName = getCountryName(countryFilter);
+      let location = "";
+      if (locationQuery.trim() === "") {
+        // Default to the selected country (e.g. India) to fetch all jobs in the country
+        location = countryName ? ` in ${countryName}` : "";
+      } else {
+        // Refined search within the selected country context
+        const queryLower = locationQuery.trim().toLowerCase();
+        if (countryName && !queryLower.includes(countryName.toLowerCase())) {
+          location = ` in ${locationQuery.trim()}, ${countryName}`;
+        } else {
+          location = ` in ${locationQuery.trim()}`;
+        }
+      }
+
       const apiQuery = `${role}${location}`;
 
       const res = await fetch(`${baseUrl}/api/jobs?query=${encodeURIComponent(apiQuery)}&page=1`);
@@ -34,7 +65,7 @@ export default function JobHuntPage() {
           id: job.job_id,
           title: job.job_title,
           company: job.employer_name,
-          location: job.job_city ? `${job.job_city}, ${job.job_country}` : "Remote",
+          location: job.job_city ? `${job.job_city}, ${getCountryName(job.job_country)}` : (getCountryName(job.job_country) || "Remote"),
           salary: job.job_min_salary ? `$${job.job_min_salary / 1000}k - $${job.job_max_salary / 1000}k` : "Not disclosed",
           type: job.job_employment_type || "Full-time",
           match: Math.floor(Math.random() * (99 - 70 + 1) + 70), 
@@ -59,7 +90,7 @@ export default function JobHuntPage() {
 
   useEffect(() => {
     fetchJobs();
-  }, []); // Fetch on mount
+  }, [countryFilter]); // Fetch on mount or when country context selection changes
 
   const handleApply = (job: any) => {
     const storedIds = localStorage.getItem("user_applied_job_ids");
@@ -86,6 +117,24 @@ export default function JobHuntPage() {
 
     if (job.apply_link) window.open(job.apply_link, "_blank");
     setJobs(prevJobs => prevJobs.filter(j => j.id !== job.id));
+  };
+
+  // Get dynamic location placeholder based on country selection
+  const getLocationPlaceholder = () => {
+    switch (countryFilter) {
+      case "IN":
+        return "Search state or city in India (e.g. Bangalore, Delhi)...";
+      case "US":
+        return "Search state or city in US (e.g. California, New York)...";
+      case "GB":
+        return "Search city in UK (e.g. London, Manchester)...";
+      case "CA":
+        return "Search city in Canada (e.g. Toronto, Vancouver)...";
+      case "AU":
+        return "Search city in Australia (e.g. Sydney, Melbourne)...";
+      default:
+        return "Search state, city or region...";
+    }
   };
 
   // Double filter - instant local filters for unmatched typing
@@ -122,7 +171,7 @@ export default function JobHuntPage() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           
           {/* Keyword / Role Input */}
-          <div className="md:col-span-5 flex items-center gap-3 px-4 py-3 bg-muted/40 border border-border rounded-2xl focus-within:border-primary/50 transition-all">
+          <div className="md:col-span-4 flex items-center gap-3 px-4 py-3 bg-muted/40 border border-border rounded-2xl focus-within:border-primary/50 transition-all">
             <Search size={18} className="text-muted-foreground shrink-0" />
             <div className="flex-1">
               <label className="block text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Keywords / Role</label>
@@ -136,14 +185,34 @@ export default function JobHuntPage() {
             </div>
           </div>
 
+          {/* Country Selection */}
+          <div className="md:col-span-2 flex items-center gap-3 px-4 py-3 bg-muted/40 border border-border rounded-2xl focus-within:border-primary/50 transition-all">
+            <Globe size={18} className="text-muted-foreground shrink-0" />
+            <div className="flex-1">
+              <label className="block text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Country</label>
+              <select 
+                value={countryFilter}
+                onChange={(e) => setCountryFilter(e.target.value)}
+                className="w-full bg-transparent border-none text-foreground text-sm focus:outline-none p-0 font-bold cursor-pointer"
+              >
+                <option value="IN">India</option>
+                <option value="US">United States</option>
+                <option value="GB">United Kingdom</option>
+                <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
+                <option value="GLOBAL">Global</option>
+              </select>
+            </div>
+          </div>
+
           {/* Location Input */}
-          <div className="md:col-span-4 flex items-center gap-3 px-4 py-3 bg-muted/40 border border-border rounded-2xl focus-within:border-primary/50 transition-all">
+          <div className="md:col-span-3 flex items-center gap-3 px-4 py-3 bg-muted/40 border border-border rounded-2xl focus-within:border-primary/50 transition-all">
             <MapPin size={18} className="text-muted-foreground shrink-0" />
             <div className="flex-1">
-              <label className="block text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Location</label>
+              <label className="block text-[8px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Location / State / City</label>
               <input 
                 type="text" 
-                placeholder="e.g. India, Bangalore, Remote..." 
+                placeholder={getLocationPlaceholder()}
                 value={locationQuery}
                 onChange={(e) => setLocationQuery(e.target.value)}
                 className="w-full bg-transparent border-none text-foreground text-sm focus:outline-none p-0 font-medium"

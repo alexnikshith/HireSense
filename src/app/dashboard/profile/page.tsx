@@ -141,158 +141,160 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="p-8 space-y-10 max-w-4xl relative">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile Settings</h1>
-        <p className="text-muted-foreground text-sm mt-1">Manage your active details and claim packages.</p>
-      </div>
-      
-      {/* Profile Info Container */}
-      <div className="bg-white border border-border rounded-[2.5rem] overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-        <div className="h-32 bg-primary/10" />
-        <div className="px-8 pb-8 space-y-8">
-          <div className="w-24 h-24 rounded-3xl bg-white -mt-12 border-4 border-white flex items-center justify-center text-3xl font-bold text-primary shadow-md">{getInitials()}</div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Full Name</label>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  placeholder="Enter your full name" 
-                  className="w-full bg-transparent border border-border rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-primary text-foreground" 
-                />
-                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    <>
+      <div className="p-8 space-y-10 max-w-4xl relative">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile Settings</h1>
+          <p className="text-muted-foreground text-sm mt-1">Manage your active details and claim packages.</p>
+        </div>
+        
+        {/* Profile Info Container */}
+        <div className="bg-white border border-border rounded-[2.5rem] overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <div className="h-32 bg-primary/10" />
+          <div className="px-8 pb-8 space-y-8">
+            <div className="w-24 h-24 rounded-3xl bg-white -mt-12 border-4 border-white flex items-center justify-center text-3xl font-bold text-primary shadow-md">{getInitials()}</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Full Name</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)} 
+                    placeholder="Enter your full name" 
+                    className="w-full bg-transparent border border-border rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-primary text-foreground" 
+                  />
+                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Email</label>
+                <div className="relative">
+                  <input 
+                    type="email" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    placeholder="Enter your email" 
+                    className="w-full bg-transparent border border-border rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-primary text-foreground" 
+                  />
+                  <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Email</label>
-              <div className="relative">
-                <input 
-                  type="email" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  placeholder="Enter your email" 
-                  className="w-full bg-transparent border border-border rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-primary text-foreground" 
-                />
-                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              </div>
-            </div>
-          </div>
-          <button onClick={handleSave} className="px-8 py-3.5 bg-primary text-primary-foreground rounded-2xl font-bold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all">
-            {saved ? "Saved Successfully!" : "Save Changes"}
-          </button>
-        </div>
-      </div>
-
-      {/* Subscription Section */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold tracking-tight pt-8 text-foreground flex items-center gap-2">
-          <CreditCard className="text-primary" /> Subscription & Credits
-        </h2>
-        <p className="text-sm text-muted-foreground">Select a pricing model to purchase credits and optimize more resumes instantly. Powered by Razorpay.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Free Plan */}
-        <div className={getCardStyle("free")}>
-          <div className="space-y-3">
-            {activePlan === "free" && (
-              <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1 w-max">CURRENT PLAN</div>
-            )}
-            <h3 className="text-lg font-bold text-foreground">Free Plan</h3>
-            <p className="text-3xl font-extrabold text-foreground">₹0</p>
-            <p className="text-muted-foreground text-xs font-medium">Add 400 N Credits to your account.</p>
-          </div>
-          <button 
-            onClick={() => displayRazorpay("free", 0, 400)} 
-            className="mt-6 py-3 w-full bg-black text-white font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
-          >
-            {activePlan === "free" ? "Current Plan" : "Claim Free"}
-          </button>
-        </div>
-
-        {/* Standard Plan */}
-        <div className={getCardStyle("standard")}>
-          <div className="space-y-3">
-            {activePlan === "standard" && (
-              <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1 w-max">CURRENT PLAN</div>
-            )}
-            <h3 className="text-lg font-bold text-foreground">Standard Plan</h3>
-            <p className="text-3xl font-extrabold text-foreground">₹500</p>
-            <p className="text-muted-foreground text-xs font-medium">Add 450 N Credits to your account.</p>
-          </div>
-          <button 
-            onClick={() => displayRazorpay("standard", 500, 450)} 
-            className="mt-6 py-3 w-full bg-black text-white font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
-          >
-            {activePlan === "standard" ? "Current Plan" : "Buy Now"}
-          </button>
-        </div>
-
-        {/* Pro Plan */}
-        <div className={getCardStyle("pro")}>
-          <div className="space-y-3">
-            {activePlan === "pro" ? (
-              <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1 w-max">CURRENT PLAN</div>
-            ) : (
-              <div className="inline-block px-2.5 py-1 bg-muted text-muted-foreground text-[9px] font-bold rounded-full mb-1 w-max">MOST POPULAR</div>
-            )}
-            <h3 className="text-lg font-bold text-foreground">Pro Plan</h3>
-            <p className="text-3xl font-extrabold text-foreground">₹1000</p>
-            <p className="text-muted-foreground text-xs font-medium">Add 900 N Credits to your account.</p>
-          </div>
-          <button 
-            onClick={() => displayRazorpay("pro", 1000, 900)} 
-            className="mt-6 py-3 w-full bg-black text-white font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
-          >
-            {activePlan === "pro" ? "Current Plan" : "Buy Now"}
-          </button>
-        </div>
-      </div>
-      
-      <div className="p-4 bg-muted/60 border border-border rounded-3xl flex gap-3 text-xs text-muted-foreground max-w-2xl">
-        <ShieldCheck className="text-green-500 shrink-0 mt-0.5" size={16} />
-        <p>
-          Payments are secure and fully integrated via <strong>Razorpay Standard Web Checkout</strong> in sandbox test mode. No real money will be charged during development.
-        </p>
-      </div>
-    </div>
-    
-    <AnimatePresence>
-      {notification.show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <motion.div 
-            initial={{ scale: 0.95, opacity: 0 }} 
-            animate={{ scale: 1, opacity: 1 }} 
-            exit={{ scale: 0.95, opacity: 0 }}
-            className="bg-white border border-border p-8 rounded-[2.5rem] max-w-md w-full shadow-2xl relative space-y-6 text-center"
-          >
-            {notification.type === "success" ? (
-              <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto border border-green-100">
-                <ShieldCheck size={32} />
-              </div>
-            ) : (
-              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto border border-red-100">
-                <AlertCircle size={32} />
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold text-foreground">{notification.title}</h3>
-              <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">{notification.message}</p>
-            </div>
-            
-            <button 
-              onClick={() => setNotification({ ...notification, show: false })}
-              className="w-full py-3.5 bg-black text-white hover:opacity-90 active:scale-[0.98] transition-all font-bold text-sm rounded-2xl shadow-md"
-            >
-              Okay
+            <button onClick={handleSave} className="px-8 py-3.5 bg-primary text-primary-foreground rounded-2xl font-bold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all">
+              {saved ? "Saved Successfully!" : "Save Changes"}
             </button>
-          </motion.div>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+
+        {/* Subscription Section */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold tracking-tight pt-8 text-foreground flex items-center gap-2">
+            <CreditCard className="text-primary" /> Subscription & Credits
+          </h2>
+          <p className="text-sm text-muted-foreground">Select a pricing model to purchase credits and optimize more resumes instantly. Powered by Razorpay.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Free Plan */}
+          <div className={getCardStyle("free")}>
+            <div className="space-y-3">
+              {activePlan === "free" && (
+                <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1 w-max">CURRENT PLAN</div>
+              )}
+              <h3 className="text-lg font-bold text-foreground">Free Plan</h3>
+              <p className="text-3xl font-extrabold text-foreground">₹0</p>
+              <p className="text-muted-foreground text-xs font-medium">Add 400 N Credits to your account.</p>
+            </div>
+            <button 
+              onClick={() => displayRazorpay("free", 0, 400)} 
+              className="mt-6 py-3 w-full bg-black text-white font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
+            >
+              {activePlan === "free" ? "Current Plan" : "Claim Free"}
+            </button>
+          </div>
+
+          {/* Standard Plan */}
+          <div className={getCardStyle("standard")}>
+            <div className="space-y-3">
+              {activePlan === "standard" && (
+                <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1 w-max">CURRENT PLAN</div>
+              )}
+              <h3 className="text-lg font-bold text-foreground">Standard Plan</h3>
+              <p className="text-3xl font-extrabold text-foreground">₹500</p>
+              <p className="text-muted-foreground text-xs font-medium">Add 450 N Credits to your account.</p>
+            </div>
+            <button 
+              onClick={() => displayRazorpay("standard", 500, 450)} 
+              className="mt-6 py-3 w-full bg-black text-white font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
+            >
+              {activePlan === "standard" ? "Current Plan" : "Buy Now"}
+            </button>
+          </div>
+
+          {/* Pro Plan */}
+          <div className={getCardStyle("pro")}>
+            <div className="space-y-3">
+              {activePlan === "pro" ? (
+                <div className="inline-block px-2.5 py-1 bg-primary/20 text-primary text-[9px] font-bold rounded-full mb-1 w-max">CURRENT PLAN</div>
+              ) : (
+                <div className="inline-block px-2.5 py-1 bg-muted text-muted-foreground text-[9px] font-bold rounded-full mb-1 w-max">MOST POPULAR</div>
+              )}
+              <h3 className="text-lg font-bold text-foreground">Pro Plan</h3>
+              <p className="text-3xl font-extrabold text-foreground">₹1000</p>
+              <p className="text-muted-foreground text-xs font-medium">Add 900 N Credits to your account.</p>
+            </div>
+            <button 
+              onClick={() => displayRazorpay("pro", 1000, 900)} 
+              className="mt-6 py-3 w-full bg-black text-white font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-[0.98]"
+            >
+              {activePlan === "pro" ? "Current Plan" : "Buy Now"}
+            </button>
+          </div>
+        </div>
+        
+        <div className="p-4 bg-muted/60 border border-border rounded-3xl flex gap-3 text-xs text-muted-foreground max-w-2xl">
+          <ShieldCheck className="text-green-500 shrink-0 mt-0.5" size={16} />
+          <p>
+            Payments are secure and fully integrated via <strong>Razorpay Standard Web Checkout</strong> in sandbox test mode. No real money will be charged during development.
+          </p>
+        </div>
+      </div>
+      
+      <AnimatePresence>
+        {notification.show && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white border border-border p-8 rounded-[2.5rem] max-w-md w-full shadow-2xl relative space-y-6 text-center"
+            >
+              {notification.type === "success" ? (
+                <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto border border-green-100">
+                  <ShieldCheck size={32} />
+                </div>
+              ) : (
+                <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto border border-red-100">
+                  <AlertCircle size={32} />
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-foreground">{notification.title}</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-line leading-relaxed">{notification.message}</p>
+              </div>
+              
+              <button 
+                onClick={() => setNotification({ ...notification, show: false })}
+                className="w-full py-3.5 bg-black text-white hover:opacity-90 active:scale-[0.98] transition-all font-bold text-sm rounded-2xl shadow-md"
+              >
+                Okay
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
