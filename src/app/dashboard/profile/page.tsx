@@ -43,7 +43,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     // Initialize or load credits and plan from local storage
-    const storedPlan = localStorage.getItem("active_plan") || "pro";
+    const storedPlan = localStorage.getItem("active_plan") || "free";
     const storedCredits = localStorage.getItem("user_credits") || "400";
     
     // Persist if not already present

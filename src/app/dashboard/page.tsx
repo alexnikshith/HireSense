@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activePlan, setActivePlan] = useState("free");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load state from local storage on mount to survive navigation and page reloads!
@@ -29,6 +30,9 @@ export default function DashboardPage() {
     if (savedFileName) {
       setPersistedFileName(savedFileName);
     }
+
+    const plan = localStorage.getItem("active_plan") || "free";
+    setActivePlan(plan);
   }, []);
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,8 +143,8 @@ export default function DashboardPage() {
           <p className="text-muted-foreground text-sm">Analyze your resume against any job description.</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="px-4 py-2 glass-card rounded-xl text-xs font-bold flex items-center gap-2 border-border">
-            <Sparkles size={14} className="text-primary" /> Pro Plan
+          <div className="px-4 py-2 glass-card rounded-xl text-xs font-bold flex items-center gap-2 border-border capitalize">
+            <Sparkles size={14} className="text-primary" /> {activePlan} Plan
           </div>
         </div>
       </div>
