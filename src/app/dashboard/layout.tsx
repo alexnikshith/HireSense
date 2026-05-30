@@ -120,7 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Page Content wrapped in a white card container similar to screenshots */}
-        <div className="flex-1 bg-white p-8 rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-border overflow-y-auto">
+        <div className="flex-1 bg-white p-8 rounded-lg shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-border overflow-y-auto no-scrollbar">
           {children}
         </div>
       </main>
