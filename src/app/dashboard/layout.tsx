@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     const stored = localStorage.getItem("user_credits");
-    if (!stored) {
+    if (!stored || stored === "2000") {
       localStorage.setItem("user_credits", "400");
       setCredits(400);
     } else {
