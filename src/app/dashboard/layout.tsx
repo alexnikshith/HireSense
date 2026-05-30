@@ -32,12 +32,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
 
-    const stored = localStorage.getItem("user_credits");
-    if (!stored || stored === "2000") {
+    const hasReset = localStorage.getItem("user_credits_reset_v1");
+    if (!hasReset) {
       localStorage.setItem("user_credits", "400");
+      localStorage.setItem("user_credits_reset_v1", "true");
       setCredits(400);
     } else {
-      setCredits(parseInt(stored));
+      const stored = localStorage.getItem("user_credits");
+      if (!stored) {
+        localStorage.setItem("user_credits", "400");
+        setCredits(400);
+      } else {
+        setCredits(parseInt(stored));
+      }
     }
 
     const handleStorageChange = () => {

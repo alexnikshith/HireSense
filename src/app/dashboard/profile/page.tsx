@@ -44,10 +44,14 @@ export default function ProfilePage() {
   useEffect(() => {
     // Initialize or load credits and plan from local storage
     const storedPlan = localStorage.getItem("active_plan") || "free";
-    let storedCredits = localStorage.getItem("user_credits") || "400";
-    if (storedCredits === "2000") {
-      storedCredits = "400";
+    
+    const hasReset = localStorage.getItem("user_credits_reset_v1");
+    let storedCredits = "400";
+    if (!hasReset) {
       localStorage.setItem("user_credits", "400");
+      localStorage.setItem("user_credits_reset_v1", "true");
+    } else {
+      storedCredits = localStorage.getItem("user_credits") || "400";
     }
     
     // Persist if not already present
