@@ -26,7 +26,7 @@
 ## 🌟 Core Features & Functionalities
 
 ### 1. 🧠 Intelligence Hub (AI Resume Analyzer)
-*   **Drag-and-Drop Resume Parser**: Seamless upload interface supporting `.pdf` (highly optimized), `.doc`, and `.docx` formats.
+*   **Drag-and-Drop Resume Parser**: Seamless upload interface supporting `.pdf` (highly optimized and recommended), `.doc`, and `.docx` formats.
 *   **ATS Compatibility Rating**: Generates a standardized score out of 100, alongside an academic-grade letter rating (`A`, `B`, `C`, `D`, `F`) indicating hiring readiness.
 *   **Interactive Job Description Alignment**: Paste any target role description to calculate semantic overlap, identify missing keywords, and get custom feedback.
 *   **Top Priority Action list**: Dynamically ranks and presents the most impactful improvements (e.g. missing skills, formatting fixes) sorted by expected score boost.
