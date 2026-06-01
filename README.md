@@ -82,7 +82,7 @@ graph TD
 
 ### High-Performance Tech Stack
 *   **Frontend**: Next.js 14 App Router with clean .no-scrollbar styling applied globally to prevent nested scrollbars, React 18, Tailwind CSS, TypeScript, Framer Motion (premium glassmorphic styling, background glow filters, and micro-interactions), Lucide React (modern vector icons), Recharts (dynamic analytics area graphs).
-*   **Backend**: FastAPI, Python 3.9+, Uvicorn server, PDFMiner.six (ultra-lightweight text extraction), Scikit-Learn (TF-IDF Vectorization, Cosine Similarity matching), Pydantic (strict runtime data validations), HTTPX (asynchronous fetch calls).
+*   **Backend**: FastAPI, Python 3.9 to 3.12+, Uvicorn server, PDFMiner.six (ultra-lightweight text extraction), Scikit-Learn (TF-IDF Vectorization, Cosine Similarity matching), Pydantic (strict runtime data validations), HTTPX (asynchronous fetch calls).
 *   **Hosting**: Vercel Serverless Architecture (Edge network caching for assets, serverless functions handling the FastAPI endpoints).
 
 ---
