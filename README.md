@@ -300,6 +300,9 @@ pip install -r requirements.txt
 
 # Launch FastAPI development server
 python api/index.py
+
+### IDE Python Interpreter Configuration
+To resolve any IDE red squiggles on imports, open the command palette (Ctrl + Shift + P), select **Python: Select Interpreter**, and select the interpreter inside the ./venv directory.
 ```
 *The FastAPI backend will now start on [http://127.0.0.1:8000](http://127.0.0.1:8000).*
 
