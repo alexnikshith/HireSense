@@ -1,4 +1,4 @@
-# HireSense Development Manual
+# TalentScope AI Development Manual
 
 Welcome to the developer guide for the TalentScope AI platform.
 
