@@ -7,7 +7,7 @@
 
 > **TalentScope AI** (formerly *HireSense*) is a premium, state-of-the-art AI-powered Resume Intelligence SaaS Platform designed for modern candidates. It delivers instantaneous, recruiter-level feedback, multi-dimensional ATS (Applicant Tracking System) scoring, deep semantic job matching, dynamic learning roadmaps, interactive bullet-point optimization, global job tracking CRM, and seamless Sandbox payment models.
 
-🔗 **Live Platform URL:** [https://talentscopeai.vercel.app/](https://talentscopeai.vercel.app/)
+🔗 **Live Platform URL:** [https://talentscopeai.vercel.app/](https://talentscopeai.vercel.app/) *(Checkout sandbox simulation is fully enabled)*
 
 ---
 
