@@ -70,7 +70,7 @@ Covers server dependency resolutions, venv activation (.\\venv\\Scripts\\Activat
 
 ## 14. License & Contribution Guidelines
 
-HireSense is licensed under standard developer terms.
+TalentScope AI is licensed under standard developer terms.
 
 
 ## 15. Credits Reset and Purchase Workflows
