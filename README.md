@@ -1,4 +1,4 @@
-# TalentScope AI 🚀
+# TalentScope AI 🚀 — Resume Intelligence Platform
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-TalentScope%20AI-purple?style=for-the-badge&logo=vercel)](https://talentscopeai.vercel.app/)
 [![Next.js](https://img.shields.io/badge/Frontend-Next.js%2014-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
