@@ -65,7 +65,7 @@ Synchronizes saved data profiles and claims free allowances on mount.
 
 ## 13. Troubleshooting & FAQ
 
-Covers server dependency resolutions and deployment pipeline fixes.
+Covers server dependency resolutions, venv activation (.\\venv\\Scripts\\Activate.ps1), requirements installation, and deployment pipeline fixes.
 
 
 ## 14. License & Contribution Guidelines
