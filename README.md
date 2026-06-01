@@ -268,6 +268,9 @@ Resume_Analyzer/
 
 ## 🛠️ Local Development & Setup Guide
 
+### Troubleshooting Browser Caching
+If you still see the old legacy branding icon on reload, perform a hard refresh (**Ctrl + F5** on Windows or **Cmd + Shift + R** on Mac) to flush the browser's aggressive asset caching.
+
 ### Prerequisites
 *   **Node.js**: `v18.x` or higher
 *   **Python**: `v3.9` to `v3.12`
