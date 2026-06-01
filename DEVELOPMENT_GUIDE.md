@@ -1,6 +1,6 @@
 # HireSense Development Manual
 
-Welcome to the developer guide for the HireSense AI platform.
+Welcome to the developer guide for the TalentScope AI platform.
 
 
 ## 1. System Architecture
