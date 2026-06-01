@@ -20,7 +20,7 @@ Contains layout routes for dashboard, job hunt, analytics, and settings.
 
 ## 4. Local Storage Caching Strategy
 
-Persists resume meta, analysis status, and credentials cleanly.
+Persists resume meta, analysis status, active plan metrics, and credentials cleanly.
 
 
 ## 5. ATS Scoring Algorithm
