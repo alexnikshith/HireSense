@@ -22,7 +22,8 @@ export default function ApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const stored = localStorage.getItem("user_applied_jobs_list");
+    const username = localStorage.getItem("user_name") || "default";
+    const stored = localStorage.getItem(`user_applied_jobs_list_${username}`);
     if (stored) {
       setAppliedJobs(JSON.parse(stored));
     }
@@ -33,21 +34,23 @@ export default function ApplicationsPage() {
       job.id === id ? { ...job, status: newStatus } : job
     );
     setAppliedJobs(updated);
-    localStorage.setItem("user_applied_jobs_list", JSON.stringify(updated));
+    const username = localStorage.getItem("user_name") || "default";
+    localStorage.setItem(`user_applied_jobs_list_${username}`, JSON.stringify(updated));
   };
 
   const deleteApplication = (id: string) => {
     if (confirm("Are you sure you want to remove this job from your tracking list?")) {
       const updated = appliedJobs.filter(job => job.id !== id);
       setAppliedJobs(updated);
-      localStorage.setItem("user_applied_jobs_list", JSON.stringify(updated));
+      const username = localStorage.getItem("user_name") || "default";
+      localStorage.setItem(`user_applied_jobs_list_${username}`, JSON.stringify(updated));
 
       // Also clean it out of the user_applied_job_ids list so they could see it in Job Hunt again if they want
-      const storedIds = localStorage.getItem("user_applied_job_ids");
+      const storedIds = localStorage.getItem(`user_applied_job_ids_${username}`);
       if (storedIds) {
         const ids = JSON.parse(storedIds);
         const updatedIds = ids.filter((currId: string) => currId !== id);
-        localStorage.setItem("user_applied_job_ids", JSON.stringify(updatedIds));
+        localStorage.setItem(`user_applied_job_ids_${username}`, JSON.stringify(updatedIds));
       }
     }
   };

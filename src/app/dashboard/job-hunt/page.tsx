@@ -75,7 +75,8 @@ export default function JobHuntPage() {
           apply_link: job.job_apply_link
         }));
 
-        const storedIds = localStorage.getItem("user_applied_job_ids");
+        const username = localStorage.getItem("user_name") || "default";
+        const storedIds = localStorage.getItem(`user_applied_job_ids_${username}`);
         const appliedIds = storedIds ? JSON.parse(storedIds) : [];
         const unappliedJobs = formattedJobs.filter((job: any) => !appliedIds.includes(job.id));
 
@@ -104,15 +105,16 @@ export default function JobHuntPage() {
       return;
     }
 
-    const storedIds = localStorage.getItem("user_applied_job_ids");
+    const username = localStorage.getItem("user_name") || "default";
+    const storedIds = localStorage.getItem(`user_applied_job_ids_${username}`);
     const appliedIds = storedIds ? JSON.parse(storedIds) : [];
     
     if (!appliedIds.includes(job.id)) {
       appliedIds.push(job.id);
-      localStorage.setItem("user_applied_job_ids", JSON.stringify(appliedIds));
+      localStorage.setItem(`user_applied_job_ids_${username}`, JSON.stringify(appliedIds));
     }
 
-    const storedJobs = localStorage.getItem("user_applied_jobs_list");
+    const storedJobs = localStorage.getItem(`user_applied_jobs_list_${username}`);
     const appliedJobs = storedJobs ? JSON.parse(storedJobs) : [];
     
     const newAppliedJob = {
@@ -123,7 +125,7 @@ export default function JobHuntPage() {
     
     if (!appliedJobs.some((j: any) => j.id === job.id)) {
       appliedJobs.push(newAppliedJob);
-      localStorage.setItem("user_applied_jobs_list", JSON.stringify(appliedJobs));
+      localStorage.setItem(`user_applied_jobs_list_${username}`, JSON.stringify(appliedJobs));
     }
 
     // Deduct 100 credits
