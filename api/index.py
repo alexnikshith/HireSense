@@ -42,7 +42,10 @@ class Database:
                 else:
                     self.conn_str += "?sslmode=require"
         else:
-            self.db_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.db")
+            if os.environ.get("VERCEL"):
+                self.db_file = "/tmp/users.db"
+            else:
+                self.db_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.db")
 
     def get_connection(self):
         if self.is_postgres:
