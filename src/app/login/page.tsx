@@ -52,7 +52,7 @@ export default function LoginPage() {
       
       router.push("/dashboard");
     } catch (err: any) {
-      setError("Cannot reach backend server. Please make sure the backend is running!");
+      setError(`Cannot reach backend server. Error details: ${err.message || String(err)}`);
     }
   };
 
