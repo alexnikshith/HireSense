@@ -23,7 +23,8 @@ export default function SignupPage() {
     }
 
     try {
-      const res = await fetch(`/api/auth/signup`, {
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+      const res = await fetch(`${baseUrl}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

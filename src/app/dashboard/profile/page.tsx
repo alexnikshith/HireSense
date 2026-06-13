@@ -46,7 +46,8 @@ export default function ProfilePage() {
     if (userName) {
       const fetchUserData = async () => {
         try {
-          const res = await fetch(`/api/auth/user?username=${encodeURIComponent(userName)}`);
+          const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+          const res = await fetch(`${baseUrl}/api/auth/user?username=${encodeURIComponent(userName)}`);
           if (res.ok) {
             const data = await res.json();
             localStorage.setItem("user_credits", data.credits.toString());
@@ -104,7 +105,8 @@ export default function ProfilePage() {
 
       // Sync with backend
       try {
-        fetch(`/api/auth/update`, {
+        const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+        fetch(`${baseUrl}/api/auth/update`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, credits: updated, active_plan: planId }),
@@ -144,7 +146,8 @@ export default function ProfilePage() {
 
         // Sync with backend
         try {
-          fetch(`/api/auth/update`, {
+          const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+          fetch(`${baseUrl}/api/auth/update`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, credits: updated, active_plan: planId }),

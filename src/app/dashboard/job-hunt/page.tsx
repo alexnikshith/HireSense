@@ -33,6 +33,8 @@ export default function JobHuntPage() {
     setLoading(true);
     setError("");
     try {
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+      
       // Combine inputs into a clean, searchable JSearch query
       const role = roleQuery.trim() === "" ? "software engineering" : roleQuery.trim();
       
@@ -53,7 +55,7 @@ export default function JobHuntPage() {
 
       const apiQuery = `${role}${location}`;
 
-      const res = await fetch(`/api/jobs?query=${encodeURIComponent(apiQuery)}&page=1`);
+      const res = await fetch(`${baseUrl}/api/jobs?query=${encodeURIComponent(apiQuery)}&page=1`);
       const data = await res.json();
       
       if (!res.ok) throw new Error(data.detail || "Failed to fetch jobs");
@@ -133,7 +135,8 @@ export default function JobHuntPage() {
     try {
       const username = localStorage.getItem("user_name") || "nikshith";
       const plan = localStorage.getItem("active_plan") || "free";
-      fetch(`/api/auth/update`, {
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+      fetch(`${baseUrl}/api/auth/update`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, credits: newCredits, active_plan: plan }),

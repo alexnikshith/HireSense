@@ -33,7 +33,8 @@ export default function AlterResumePage() {
     setError("");
 
     try {
-      const res = await fetch(`/api/optimize-bullets`, {
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+      const res = await fetch(`${baseUrl}/api/optimize-bullets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
