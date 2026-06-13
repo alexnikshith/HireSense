@@ -93,6 +93,17 @@ export default function JobHuntPage() {
   }, [countryFilter]); // Fetch on mount or when country context selection changes
 
   const handleApply = (job: any) => {
+    const currentCredits = parseInt(localStorage.getItem("user_credits") || "400");
+    if (currentCredits < 100) {
+      const wantToSubscribe = window.confirm(
+        "You do not have enough credits to apply for this job. Please subscribe to a plan to unlock more opportunities."
+      );
+      if (wantToSubscribe) {
+        window.location.href = "/dashboard/profile";
+      }
+      return;
+    }
+
     const storedIds = localStorage.getItem("user_applied_job_ids");
     const appliedIds = storedIds ? JSON.parse(storedIds) : [];
     
@@ -114,6 +125,11 @@ export default function JobHuntPage() {
       appliedJobs.push(newAppliedJob);
       localStorage.setItem("user_applied_jobs_list", JSON.stringify(appliedJobs));
     }
+
+    // Deduct 100 credits
+    const newCredits = currentCredits - 100;
+    localStorage.setItem("user_credits", newCredits.toString());
+    window.dispatchEvent(new Event("credits_updated"));
 
     if (job.apply_link) window.open(job.apply_link, "_blank");
     setJobs(prevJobs => prevJobs.filter(j => j.id !== job.id));
@@ -327,9 +343,9 @@ export default function JobHuntPage() {
                 <button onClick={() => handleApply(job)} className="flex-1 py-2.5 bg-foreground text-background font-bold rounded-xl text-xs flex items-center justify-center gap-2 hover:bg-foreground/90 transition-all">
                   Quick Apply
                 </button>
-                <a href={job.apply_link} target="_blank" rel="noreferrer" className="px-3 py-2.5 bg-muted text-muted-foreground rounded-xl hover:bg-muted/80 transition-all flex items-center justify-center">
+                <button onClick={() => handleApply(job)} className="px-3 py-2.5 bg-muted text-muted-foreground rounded-xl hover:bg-muted/80 transition-all flex items-center justify-center">
                   <ExternalLink size={16} />
-                </a>
+                </button>
               </div>
             </motion.div>
           ))}
