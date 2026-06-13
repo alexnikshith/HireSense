@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { User, Mail, CreditCard, Sparkles, AlertCircle, ShieldCheck } from "lucide-react";
+import { User, Mail, CreditCard, Sparkles, AlertCircle, ShieldCheck, Info } from "lucide-react";
 
 export default function ProfilePage() {
   const [name, setName] = useState("");
@@ -84,6 +84,11 @@ export default function ProfilePage() {
   };
 
   const displayRazorpay = async (planId: string, amount: number, creditsToAdd: number) => {
+    if (activePlan === planId) {
+      triggerAlert("info", "Plan Existing", "This plan is already active on your account.");
+      return;
+    }
+
     if (planId === "free") {
       const current = parseInt(localStorage.getItem("user_credits") || "400");
       const updated = current + creditsToAdd;
@@ -281,6 +286,10 @@ export default function ProfilePage() {
               {notification.type === "success" ? (
                 <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto border border-green-100">
                   <ShieldCheck size={32} />
+                </div>
+              ) : notification.type === "info" ? (
+                <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto border border-blue-100">
+                  <Info size={32} />
                 </div>
               ) : (
                 <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto border border-red-100">
