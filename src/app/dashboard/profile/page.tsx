@@ -45,11 +45,11 @@ export default function ProfilePage() {
     // Initialize or load credits and plan from local storage
     const storedPlan = localStorage.getItem("active_plan") || "free";
     
-    const hasReset = localStorage.getItem("user_credits_reset_v1");
+    const hasReset = localStorage.getItem("user_credits_reset_v2");
     let storedCredits = "400";
     if (!hasReset) {
       localStorage.setItem("user_credits", "400");
-      localStorage.setItem("user_credits_reset_v1", "true");
+      localStorage.setItem("user_credits_reset_v2", "true");
     } else {
       storedCredits = localStorage.getItem("user_credits") || "400";
     }

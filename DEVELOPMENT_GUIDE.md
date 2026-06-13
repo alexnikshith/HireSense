@@ -75,4 +75,4 @@ TalentScope AI is licensed under standard developer terms.
 
 ## 15. Credits Reset and Purchase Workflows
 
-Upon account creation, users are allocated 400 credits. The app utilizes a one-time migration (user_credits_reset_v1) to cleanly handle legacy accounts, while standard payment workflows remain operational.
+Upon account creation, users are allocated 400 credits. The app utilizes a one-time migration (user_credits_reset_v2) to cleanly handle legacy accounts, while standard payment workflows remain operational.
