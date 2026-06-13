@@ -23,7 +23,15 @@ export default function ApplicationsPage() {
 
   useEffect(() => {
     const username = localStorage.getItem("user_name") || "default";
-    const stored = localStorage.getItem(`user_applied_jobs_list_${username}`);
+    let stored = localStorage.getItem(`user_applied_jobs_list_${username}`);
+    
+    if (!stored) {
+      const legacyStored = localStorage.getItem("user_applied_jobs_list");
+      if (legacyStored) {
+        stored = legacyStored;
+        localStorage.setItem(`user_applied_jobs_list_${username}`, legacyStored);
+      }
+    }
     if (stored) {
       setAppliedJobs(JSON.parse(stored));
     }

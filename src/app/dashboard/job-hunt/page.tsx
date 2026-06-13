@@ -76,7 +76,14 @@ export default function JobHuntPage() {
         }));
 
         const username = localStorage.getItem("user_name") || "default";
-        const storedIds = localStorage.getItem(`user_applied_job_ids_${username}`);
+        let storedIds = localStorage.getItem(`user_applied_job_ids_${username}`);
+        if (!storedIds) {
+          const legacyIds = localStorage.getItem("user_applied_job_ids");
+          if (legacyIds) {
+            storedIds = legacyIds;
+            localStorage.setItem(`user_applied_job_ids_${username}`, legacyIds);
+          }
+        }
         const appliedIds = storedIds ? JSON.parse(storedIds) : [];
         const unappliedJobs = formattedJobs.filter((job: any) => !appliedIds.includes(job.id));
 
@@ -106,7 +113,14 @@ export default function JobHuntPage() {
     }
 
     const username = localStorage.getItem("user_name") || "default";
-    const storedIds = localStorage.getItem(`user_applied_job_ids_${username}`);
+    let storedIds = localStorage.getItem(`user_applied_job_ids_${username}`);
+    if (!storedIds) {
+      const legacyIds = localStorage.getItem("user_applied_job_ids");
+      if (legacyIds) {
+        storedIds = legacyIds;
+        localStorage.setItem(`user_applied_job_ids_${username}`, legacyIds);
+      }
+    }
     const appliedIds = storedIds ? JSON.parse(storedIds) : [];
     
     if (!appliedIds.includes(job.id)) {
@@ -114,7 +128,14 @@ export default function JobHuntPage() {
       localStorage.setItem(`user_applied_job_ids_${username}`, JSON.stringify(appliedIds));
     }
 
-    const storedJobs = localStorage.getItem(`user_applied_jobs_list_${username}`);
+    let storedJobs = localStorage.getItem(`user_applied_jobs_list_${username}`);
+    if (!storedJobs) {
+      const legacyJobs = localStorage.getItem("user_applied_jobs_list");
+      if (legacyJobs) {
+        storedJobs = legacyJobs;
+        localStorage.setItem(`user_applied_jobs_list_${username}`, legacyJobs);
+      }
+    }
     const appliedJobs = storedJobs ? JSON.parse(storedJobs) : [];
     
     const newAppliedJob = {
