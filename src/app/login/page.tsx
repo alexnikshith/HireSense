@@ -22,7 +22,7 @@ export default function LoginPage() {
     }
 
     try {
-      const baseUrl = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://localhost:8000" : "";
+      const baseUrl = window.location.hostname.includes("vercel.app") ? "" : "http://localhost:8000";
       const res = await fetch(`${baseUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
