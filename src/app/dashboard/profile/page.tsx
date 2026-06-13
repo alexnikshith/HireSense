@@ -84,7 +84,8 @@ export default function ProfilePage() {
   };
 
   const displayRazorpay = async (planId: string, amount: number, creditsToAdd: number) => {
-    if (activePlan === planId) {
+    const currentActivePlan = localStorage.getItem("active_plan") || "free";
+    if (currentActivePlan === planId) {
       triggerAlert("info", "Plan Existing", "This plan is already active on your account.");
       return;
     }
