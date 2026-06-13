@@ -28,12 +28,52 @@ except Exception as _e:
     ResumeParser = NLPEngine = JobMatcher = ATSScorer = SuggestionsEngine = Dummy
 
 # Initialize Database
-DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.db")
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+class Database:
+    def __init__(self):
+        self.is_postgres = DATABASE_URL is not None and DATABASE_URL.startswith("postgres")
+        if self.is_postgres:
+            # Postgres SSL handling for safe cloud environments
+            self.conn_str = DATABASE_URL
+            if "sslmode" not in self.conn_str:
+                if "?" in self.conn_str:
+                    self.conn_str += "&sslmode=require"
+                else:
+                    self.conn_str += "?sslmode=require"
+        else:
+            self.db_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.db")
+
+    def get_connection(self):
+        if self.is_postgres:
+            import psycopg2
+            return psycopg2.connect(self.conn_str)
+        else:
+            return sqlite3.connect(self.db_file)
+
+    def execute(self, query: str, params=()):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        if self.is_postgres:
+            query = query.replace("?", "%s")
+        cursor.execute(query, params)
+        conn.commit()
+        conn.close()
+
+    def fetchone(self, query: str, params=()):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        if self.is_postgres:
+            query = query.replace("?", "%s")
+        cursor.execute(query, params)
+        row = cursor.fetchone()
+        conn.close()
+        return row
+
+db = Database()
 
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("""
+    db.execute("""
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
             email TEXT UNIQUE,
@@ -43,14 +83,12 @@ def init_db():
         )
     """)
     # Seed default user if not exists
-    cursor.execute("SELECT 1 FROM users WHERE username = ?", ("nikshith",))
-    if not cursor.fetchone():
-        cursor.execute(
+    user = db.fetchone("SELECT 1 FROM users WHERE username = ?", ("nikshith",))
+    if not user:
+        db.execute(
             "INSERT INTO users (username, email, password, credits, active_plan) VALUES (?, ?, ?, ?, ?)",
             ("nikshith", "nikshith@example.com", "1234567890", 400, "free")
         )
-    conn.commit()
-    conn.close()
 
 init_db()
 
@@ -93,31 +131,29 @@ except Exception:
 
 @app.post("/api/auth/signup")
 async def auth_signup(req: SignupRequest):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            "INSERT INTO users (username, email, password, credits, active_plan) VALUES (?, ?, ?, ?, ?)",
-            (req.username.strip(), req.email.strip().lower(), req.password, 400, "free")
-        )
-        conn.commit()
-        return {"status": "success", "username": req.username, "email": req.email}
-    except sqlite3.IntegrityError:
+    username = req.username.strip()
+    email = req.email.strip().lower()
+    
+    # Check duplicate username/email
+    existing_user = db.fetchone("SELECT 1 FROM users WHERE LOWER(username) = ?", (username.lower(),))
+    existing_email = db.fetchone("SELECT 1 FROM users WHERE LOWER(email) = ?", (email,))
+    
+    if existing_user or existing_email:
         raise HTTPException(status_code=400, detail="Username or email already exists.")
-    finally:
-        conn.close()
+        
+    db.execute(
+        "INSERT INTO users (username, email, password, credits, active_plan) VALUES (?, ?, ?, ?, ?)",
+        (username, email, req.password, 400, "free")
+    )
+    return {"status": "success", "username": username, "email": email}
 
 @app.post("/api/auth/login")
 async def auth_login(req: LoginRequest):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
     username_or_email = req.username_or_email.strip().lower()
-    cursor.execute(
+    user = db.fetchone(
         "SELECT username, email, password, credits, active_plan FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?",
         (username_or_email, username_or_email)
     )
-    user = cursor.fetchone()
-    conn.close()
     
     if not user:
         raise HTTPException(status_code=404, detail="User does not exist.")
@@ -136,26 +172,18 @@ async def auth_login(req: LoginRequest):
 
 @app.post("/api/auth/update")
 async def auth_update(req: UpdateUserRequest):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute(
+    db.execute(
         "UPDATE users SET credits = ?, active_plan = ? WHERE username = ?",
         (req.credits, req.active_plan, req.username)
     )
-    conn.commit()
-    conn.close()
     return {"status": "success"}
 
 @app.get("/api/auth/user")
 async def auth_user(username: str):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute(
+    user = db.fetchone(
         "SELECT username, email, credits, active_plan FROM users WHERE username = ?",
         (username,)
     )
-    user = cursor.fetchone()
-    conn.close()
     
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
