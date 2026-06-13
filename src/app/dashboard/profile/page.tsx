@@ -46,7 +46,7 @@ export default function ProfilePage() {
     if (userName) {
       const fetchUserData = async () => {
         try {
-          const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+          const baseUrl = process.env.NODE_ENV === "development" ? "http://localhost:8000" : "";
           const res = await fetch(`${baseUrl}/api/auth/user?username=${encodeURIComponent(userName)}`);
           if (res.ok) {
             const data = await res.json();

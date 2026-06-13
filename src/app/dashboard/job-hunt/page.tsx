@@ -33,7 +33,7 @@ export default function JobHuntPage() {
     setLoading(true);
     setError("");
     try {
-      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://localhost:8000" : "";
       
       // Combine inputs into a clean, searchable JSearch query
       const role = roleQuery.trim() === "" ? "software engineering" : roleQuery.trim();

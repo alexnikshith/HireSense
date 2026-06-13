@@ -96,7 +96,7 @@ export default function DashboardPage() {
       formData.append("job_description", jobDescription);
 
       // Use direct local Python server port 8000 in development to bypass Windows Vercel CLI bugs
-      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://localhost:8000" : "";
       
       const res = await fetch(`${baseUrl}/api/analyze`, {
         method: "POST",
@@ -122,7 +122,7 @@ export default function DashboardPage() {
       try {
         const username = localStorage.getItem("user_name") || "nikshith";
         const plan = localStorage.getItem("active_plan") || "free";
-        const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+        const baseUrl = process.env.NODE_ENV === "development" ? "http://localhost:8000" : "";
         fetch(`${baseUrl}/api/auth/update`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
