@@ -7,3 +7,6 @@ venv/
 .env
 .env.local
 output.txt
+*.db
+*.tsbuildinfo
+
