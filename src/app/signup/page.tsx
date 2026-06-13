@@ -14,7 +14,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSignup = (e: React.MouseEvent) => {
+  const handleSignup = async (e: React.MouseEvent) => {
     e.preventDefault();
     
     if (!username.trim() || !email.trim() || !password.trim()) {
@@ -22,20 +22,40 @@ export default function SignupPage() {
       return;
     }
 
-    // Save to local storage for dummy auth with cleaned values (lowercase keys)
-    const cleanUser = username.trim();
-    const cleanEmail = email.trim();
-    const cleanPass = password;
+    try {
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+      const res = await fetch(`${baseUrl}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          email: email.trim(),
+          password: password,
+        }),
+      });
 
-    localStorage.setItem("auth_username", cleanUser);
-    localStorage.setItem("auth_password", cleanPass);
-    localStorage.setItem("auth_email", cleanEmail);
-    localStorage.setItem("user_name", cleanUser);
-    localStorage.setItem("user_email", cleanEmail);
-    localStorage.setItem("active_plan", "free");
-    localStorage.setItem("user_credits", "400"); // Standard default N credits
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail || "Username or email already exists.");
+        return;
+      }
 
-    router.push("/dashboard");
+      // Save to local storage for dummy auth with cleaned values
+      localStorage.setItem("auth_username", username.trim());
+      localStorage.setItem("auth_password", password);
+      localStorage.setItem("auth_email", email.trim());
+      localStorage.setItem("user_name", username.trim());
+      localStorage.setItem("user_email", email.trim());
+      localStorage.setItem("active_plan", "free");
+      localStorage.setItem("user_credits", "400");
+      
+      // Sync layout component
+      window.dispatchEvent(new Event("credits_updated"));
+
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError("Cannot reach backend server. Please make sure the backend is running!");
+    }
   };
 
   return (

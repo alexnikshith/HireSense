@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleLogin = (e: React.MouseEvent) => {
+  const handleLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
     
     if (!username.trim() || !password.trim()) {
@@ -21,36 +21,38 @@ export default function LoginPage() {
       return;
     }
 
-    let savedUser = localStorage.getItem("auth_username");
-    let savedEmail = localStorage.getItem("auth_email") || localStorage.getItem("user_email");
-    let savedPass = localStorage.getItem("auth_password");
+    try {
+      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+      const res = await fetch(`${baseUrl}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username_or_email: username,
+          password: password,
+        }),
+      });
 
-    // If there is no registered user in localStorage yet, pre-seed a default user
-    if (!savedUser && !savedEmail) {
-      localStorage.setItem("auth_username", "nikshith");
-      localStorage.setItem("auth_email", "nikshith@example.com");
-      localStorage.setItem("auth_password", "1234567890");
-      localStorage.setItem("user_credits", "400");
-      localStorage.setItem("active_plan", "free");
-      
-      savedUser = "nikshith";
-      savedEmail = "nikshith@example.com";
-      savedPass = "1234567890";
-    }
-
-    // Accept EITHER the username OR the email
-    const isUsernameMatch = username.trim().toLowerCase() === (savedUser || "").toLowerCase();
-    const isEmailMatch = username.trim().toLowerCase() === (savedEmail || "").toLowerCase();
-
-    if ((isUsernameMatch || isEmailMatch) && password === savedPass) {
-      // Login successful
-      localStorage.setItem("user_name", savedUser || username);
-      if (savedEmail) {
-        localStorage.setItem("user_email", savedEmail);
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.detail || "Incorrect username/email or password.");
+        return;
       }
+
+      // Login successful
+      localStorage.setItem("auth_username", data.username);
+      localStorage.setItem("auth_email", data.email);
+      localStorage.setItem("auth_password", password);
+      localStorage.setItem("user_name", data.username);
+      localStorage.setItem("user_email", data.email);
+      localStorage.setItem("user_credits", data.credits.toString());
+      localStorage.setItem("active_plan", data.active_plan);
+      
+      // Sync layout component
+      window.dispatchEvent(new Event("credits_updated"));
+      
       router.push("/dashboard");
-    } else {
-      setError("Incorrect username/email or password.");
+    } catch (err: any) {
+      setError("Cannot reach backend server. Please make sure the backend is running!");
     }
   };
 

@@ -10,6 +10,7 @@ from pydantic import BaseModel
 import uvicorn
 import razorpay
 import httpx
+import sqlite3
 
 # Absolute imports for Vercel stability
 try:
@@ -26,6 +27,47 @@ except Exception as _e:
             raise Exception(f"Backend failed to initialize. Error: {err_msg}")
     ResumeParser = NLPEngine = JobMatcher = ATSScorer = SuggestionsEngine = Dummy
 
+# Initialize Database
+DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.db")
+
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            username TEXT PRIMARY KEY,
+            email TEXT UNIQUE,
+            password TEXT,
+            credits INTEGER DEFAULT 400,
+            active_plan TEXT DEFAULT 'free'
+        )
+    """)
+    # Seed default user if not exists
+    cursor.execute("SELECT 1 FROM users WHERE username = ?", ("nikshith",))
+    if not cursor.fetchone():
+        cursor.execute(
+            "INSERT INTO users (username, email, password, credits, active_plan) VALUES (?, ?, ?, ?, ?)",
+            ("nikshith", "nikshith@example.com", "1234567890", 400, "free")
+        )
+    conn.commit()
+    conn.close()
+
+init_db()
+
+class SignupRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+
+class LoginRequest(BaseModel):
+    username_or_email: str
+    password: str
+
+class UpdateUserRequest(BaseModel):
+    username: str
+    credits: int
+    active_plan: str
+
 app = FastAPI(title="Talent Scope AI API")
 
 # Enable CORS
@@ -41,7 +83,90 @@ parser = ResumeParser()
 nlp = NLPEngine()
 matcher = JobMatcher()
 scorer = ATSScorer()
-suggester = SuggestionsEngine()
+class Dummy:
+    def __getattr__(self, name):
+        raise Exception("Backend initialization failed.")
+try:
+    suggester = SuggestionsEngine()
+except Exception:
+    suggester = Dummy()
+
+@app.post("/api/auth/signup")
+async def auth_signup(req: SignupRequest):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO users (username, email, password, credits, active_plan) VALUES (?, ?, ?, ?, ?)",
+            (req.username.strip(), req.email.strip().lower(), req.password, 400, "free")
+        )
+        conn.commit()
+        return {"status": "success", "username": req.username, "email": req.email}
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=400, detail="Username or email already exists.")
+    finally:
+        conn.close()
+
+@app.post("/api/auth/login")
+async def auth_login(req: LoginRequest):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    username_or_email = req.username_or_email.strip().lower()
+    cursor.execute(
+        "SELECT username, email, password, credits, active_plan FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?",
+        (username_or_email, username_or_email)
+    )
+    user = cursor.fetchone()
+    conn.close()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User does not exist.")
+    
+    db_username, db_email, db_password, db_credits, db_active_plan = user
+    if req.password != db_password:
+        raise HTTPException(status_code=400, detail="Incorrect password.")
+        
+    return {
+        "status": "success",
+        "username": db_username,
+        "email": db_email,
+        "credits": db_credits,
+        "active_plan": db_active_plan
+    }
+
+@app.post("/api/auth/update")
+async def auth_update(req: UpdateUserRequest):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE users SET credits = ?, active_plan = ? WHERE username = ?",
+        (req.credits, req.active_plan, req.username)
+    )
+    conn.commit()
+    conn.close()
+    return {"status": "success"}
+
+@app.get("/api/auth/user")
+async def auth_user(username: str):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT username, email, credits, active_plan FROM users WHERE username = ?",
+        (username,)
+    )
+    user = cursor.fetchone()
+    conn.close()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+        
+    db_username, db_email, db_credits, db_active_plan = user
+    return {
+        "username": db_username,
+        "email": db_email,
+        "credits": db_credits,
+        "active_plan": db_active_plan
+    }
 
 @app.get("/api/health")
 @app.get("/health")

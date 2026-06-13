@@ -32,20 +32,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
 
-    const hasReset = localStorage.getItem("user_credits_reset_v2");
-    if (!hasReset) {
-      localStorage.setItem("user_credits", "400");
-      localStorage.setItem("user_credits_reset_v2", "true");
-      setCredits(400);
-    } else {
-      const stored = localStorage.getItem("user_credits");
-      if (!stored) {
-        localStorage.setItem("user_credits", "400");
-        setCredits(400);
-      } else {
-        setCredits(parseInt(stored));
+    const fetchUserData = async (username: string) => {
+      try {
+        const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+        const res = await fetch(`${baseUrl}/api/auth/user?username=${encodeURIComponent(username)}`);
+        if (res.ok) {
+          const data = await res.json();
+          localStorage.setItem("user_credits", data.credits.toString());
+          localStorage.setItem("active_plan", data.active_plan);
+          setCredits(data.credits);
+        }
+      } catch (e) {
+        console.error("Failed to fetch user data:", e);
       }
-    }
+    };
+
+    fetchUserData(userName);
 
     const handleStorageChange = () => {
       const updated = localStorage.getItem("user_credits");

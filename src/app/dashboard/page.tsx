@@ -118,6 +118,20 @@ export default function DashboardPage() {
       localStorage.setItem("user_credits", newCredits.toString());
       window.dispatchEvent(new Event("credits_updated"));
 
+      // Sync with backend database
+      try {
+        const username = localStorage.getItem("user_name") || "nikshith";
+        const plan = localStorage.getItem("active_plan") || "free";
+        const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+        fetch(`${baseUrl}/api/auth/update`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, credits: newCredits, active_plan: plan }),
+        });
+      } catch (e) {
+        console.error("Failed to sync credits with backend:", e);
+      }
+
       setResult(data);
       localStorage.setItem("last_analysis_result", JSON.stringify(data));
       

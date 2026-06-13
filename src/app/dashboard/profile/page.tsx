@@ -42,29 +42,31 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    // Initialize or load credits and plan from local storage
-    const storedPlan = localStorage.getItem("active_plan") || "free";
-    
-    const hasReset = localStorage.getItem("user_credits_reset_v2");
-    let storedCredits = "400";
-    if (!hasReset) {
-      localStorage.setItem("user_credits", "400");
-      localStorage.setItem("user_credits_reset_v2", "true");
+    const userName = localStorage.getItem("user_name") || "";
+    if (userName) {
+      const fetchUserData = async () => {
+        try {
+          const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+          const res = await fetch(`${baseUrl}/api/auth/user?username=${encodeURIComponent(userName)}`);
+          if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem("user_credits", data.credits.toString());
+            localStorage.setItem("active_plan", data.active_plan);
+            setCredits(data.credits);
+            setActivePlan(data.active_plan);
+            window.dispatchEvent(new Event("credits_updated"));
+          }
+        } catch (e) {
+          console.error("Failed to fetch profile user data:", e);
+        }
+      };
+      fetchUserData();
     } else {
-      storedCredits = localStorage.getItem("user_credits") || "400";
+      const storedPlan = localStorage.getItem("active_plan") || "free";
+      const storedCredits = localStorage.getItem("user_credits") || "400";
+      setCredits(parseInt(storedCredits));
+      setActivePlan(storedPlan);
     }
-    
-    // Persist if not already present
-    if (!localStorage.getItem("active_plan")) {
-      localStorage.setItem("active_plan", storedPlan);
-    }
-    if (!localStorage.getItem("user_credits")) {
-      localStorage.setItem("user_credits", storedCredits);
-    }
-
-    setCredits(parseInt(storedCredits));
-    setActivePlan(storedPlan);
-    window.dispatchEvent(new Event("credits_updated"));
     
     setName(localStorage.getItem("user_name") || "");
     setEmail(localStorage.getItem("user_email") || localStorage.getItem("auth_email") || "");
@@ -90,6 +92,8 @@ export default function ProfilePage() {
       return;
     }
 
+    const username = localStorage.getItem("user_name") || "nikshith";
+
     if (planId === "free") {
       const current = parseInt(localStorage.getItem("user_credits") || "400");
       const updated = current + creditsToAdd;
@@ -98,6 +102,19 @@ export default function ProfilePage() {
       setCredits(updated);
       setActivePlan(planId);
       window.dispatchEvent(new Event("credits_updated"));
+
+      // Sync with backend
+      try {
+        const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+        fetch(`${baseUrl}/api/auth/update`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, credits: updated, active_plan: planId }),
+        });
+      } catch (e) {
+        console.error(e);
+      }
+
       triggerAlert("success", "Plan Claimed!", "Successfully claimed the Free Plan!");
       return;
     }
@@ -126,6 +143,18 @@ export default function ProfilePage() {
         setCredits(updated);
         setActivePlan(planId);
         window.dispatchEvent(new Event("credits_updated"));
+
+        // Sync with backend
+        try {
+          const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
+          fetch(`${baseUrl}/api/auth/update`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, credits: updated, active_plan: planId }),
+          });
+        } catch (e) {
+          console.error(e);
+        }
         
         triggerAlert("success", "Payment Successful! 🎉", `Razorpay Payment ID: ${response.razorpay_payment_id}\n\nAdded ${creditsToAdd} Credits successfully. Enjoy your new features!`);
       },
