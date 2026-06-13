@@ -21,14 +21,21 @@ export default function LoginPage() {
       return;
     }
 
-    const savedUser = localStorage.getItem("auth_username");
-    const savedEmail = localStorage.getItem("auth_email") || localStorage.getItem("user_email");
-    const savedPass = localStorage.getItem("auth_password");
+    let savedUser = localStorage.getItem("auth_username");
+    let savedEmail = localStorage.getItem("auth_email") || localStorage.getItem("user_email");
+    let savedPass = localStorage.getItem("auth_password");
 
-    // If both are missing, the user has not signed up
+    // If there is no registered user in localStorage yet, pre-seed a default user
     if (!savedUser && !savedEmail) {
-      setError("User does not exist. Please sign up first.");
-      return;
+      localStorage.setItem("auth_username", "nikshith");
+      localStorage.setItem("auth_email", "nikshith@example.com");
+      localStorage.setItem("auth_password", "1234567890");
+      localStorage.setItem("user_credits", "400");
+      localStorage.setItem("active_plan", "free");
+      
+      savedUser = "nikshith";
+      savedEmail = "nikshith@example.com";
+      savedPass = "1234567890";
     }
 
     // Accept EITHER the username OR the email
