@@ -23,7 +23,7 @@ export default function SignupPage() {
     }
 
     try {
-      const baseUrl = window.location.hostname.includes("vercel.app") ? "" : "http://localhost:8000";
+      const baseUrl = "";
       const res = await fetch(`${baseUrl}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
