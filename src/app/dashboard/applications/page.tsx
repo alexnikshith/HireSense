@@ -23,6 +23,8 @@ export default function ApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   
   const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<{text: string, type: 'success' | 'error' | 'info'} | null>(null);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
 
   useEffect(() => {
     const username = localStorage.getItem("user_name") || "default";
@@ -38,6 +40,8 @@ export default function ApplicationsPage() {
     if (stored) {
       setAppliedJobs(JSON.parse(stored));
     }
+    
+    setIsGoogleConnected(localStorage.getItem("google_connected") === "true");
   }, []);
 
   const updateStatus = (id: string, newStatus: any) => {
@@ -93,8 +97,8 @@ export default function ApplicationsPage() {
       const data = await res.json();
       if (!res.ok) {
         if (res.status === 404 || res.status === 401) {
-          alert("Please connect your Google Account first.");
-          handleConnectGoogle();
+          setSyncMessage({text: "Please connect your Google Account first.", type: 'error'});
+          // Optional: handleConnectGoogle();
           return;
         }
         throw new Error(data.detail || "Failed to sync emails");
@@ -114,18 +118,20 @@ export default function ApplicationsPage() {
         if (anyChanges) {
           setAppliedJobs(updatedJobs);
           localStorage.setItem(`user_applied_jobs_list_${username}`, JSON.stringify(updatedJobs));
-          alert(`Synced successfully! Updated ${data.updates.length} applications based on recent emails.`);
+          setSyncMessage({text: `Synced successfully! Updated ${data.updates.length} applications based on recent emails.`, type: 'success'});
         } else {
-          alert("Synced successfully! No new status updates found in your recent emails.");
+          setSyncMessage({text: "Synced successfully! No new status updates found in your recent emails.", type: 'info'});
         }
       } else {
-        alert("Synced successfully! No emails found regarding your tracked applications.");
+        setSyncMessage({text: "Synced successfully! No emails found regarding your tracked applications.", type: 'info'});
       }
       
     } catch (err: any) {
-      alert("Error syncing emails: " + err.message);
+      setSyncMessage({text: "Error syncing emails: " + err.message, type: 'error'});
     } finally {
       setIsSyncing(false);
+      // Auto-clear message after 5 seconds
+      setTimeout(() => setSyncMessage(null), 5000);
     }
   };
 
@@ -150,12 +156,14 @@ export default function ApplicationsPage() {
           <p className="text-muted-foreground text-sm mt-1">Manage and track your active job applications in real-time.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
-            onClick={handleConnectGoogle}
-            className="px-4 py-2 bg-muted text-foreground text-xs font-bold rounded-xl border border-border hover:bg-muted/80 transition-all flex items-center gap-2 shadow-sm"
-          >
-            <Mail size={14} /> Connect Google Account
-          </button>
+          {!isGoogleConnected && (
+            <button 
+              onClick={handleConnectGoogle}
+              className="px-4 py-2 bg-muted text-foreground text-xs font-bold rounded-xl border border-border hover:bg-muted/80 transition-all flex items-center gap-2 shadow-sm"
+            >
+              <Mail size={14} /> Connect Google Account
+            </button>
+          )}
           <button 
             onClick={handleSyncEmails}
             disabled={isSyncing}
@@ -166,6 +174,24 @@ export default function ApplicationsPage() {
           </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {syncMessage && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, height: 0 }}
+            className={`p-4 rounded-xl border text-sm flex items-center gap-2 ${
+              syncMessage.type === 'error' ? 'bg-red-50 border-red-200 text-red-700' :
+              syncMessage.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' :
+              'bg-blue-50 border-blue-200 text-blue-700'
+            }`}
+          >
+            {syncMessage.type === 'error' ? <XCircle size={16} /> : <Sparkles size={16} />}
+            {syncMessage.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Dynamic Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

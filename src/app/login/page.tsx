@@ -31,6 +31,7 @@ function LoginContent() {
         localStorage.setItem("user_email", e || u);
         localStorage.setItem("user_credits", "400");
         localStorage.setItem("active_plan", "free");
+        localStorage.setItem("google_connected", "true");
         window.dispatchEvent(new Event("credits_updated"));
         router.push("/dashboard");
       }
