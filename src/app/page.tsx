@@ -515,6 +515,8 @@ export default function LandingPage() {
           <a href="#features" className="hover:text-foreground transition-colors">Features</a>
           <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
           <a href="#faq" className="hover:text-foreground transition-colors">FAQ</a>
+          <Link href="/privacy" className="hover:text-foreground transition-colors opacity-60">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-foreground transition-colors opacity-60">Terms</Link>
         </div>
         <div>© 2026 TalentScope AI Platform. Built with Google DeepMind & Antigravity.</div>
       </footer>
