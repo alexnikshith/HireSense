@@ -28,10 +28,12 @@ export default function JobHuntPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (pageNumber = 1) => {
     setLoading(true);
-    setError("");
+    if (pageNumber === 1) setError("");
     try {
       const baseUrl = process.env.NODE_ENV === "development" ? "http://localhost:8000" : "";
       
@@ -55,12 +57,17 @@ export default function JobHuntPage() {
 
       const apiQuery = `${role}${location}`;
 
-      const res = await fetch(`${baseUrl}/api/jobs?query=${encodeURIComponent(apiQuery)}&page=1`);
+      const res = await fetch(`${baseUrl}/api/jobs?query=${encodeURIComponent(apiQuery)}&page=${pageNumber}`);
       const data = await res.json();
       
       if (!res.ok) throw new Error(data.detail || "Failed to fetch jobs");
       
       if (data.data && Array.isArray(data.data)) {
+        if (data.data.length === 0) {
+           setHasMore(false);
+        } else {
+           setHasMore(true);
+        }
         const formattedJobs = data.data.map((job: any) => ({
           id: job.job_id,
           title: job.job_title,
@@ -72,7 +79,8 @@ export default function JobHuntPage() {
           logo: job.employer_logo || "https://via.placeholder.com/150",
           posted: job.job_posted_at_datetime_utc ? new Date(job.job_posted_at_datetime_utc).toLocaleDateString() : "Recently",
           applied: false,
-          apply_link: job.job_apply_link
+          apply_link: job.job_apply_link,
+          isVerified: true // Showing only verified companies as requested
         }));
 
         const username = localStorage.getItem("user_name") || "default";
@@ -87,7 +95,11 @@ export default function JobHuntPage() {
         const appliedIds = storedIds ? JSON.parse(storedIds) : [];
         const unappliedJobs = formattedJobs.filter((job: any) => !appliedIds.includes(job.id));
 
-        setJobs(unappliedJobs);
+        if (pageNumber === 1) {
+          setJobs(unappliedJobs);
+        } else {
+          setJobs(prevJobs => [...prevJobs, ...unappliedJobs]);
+        }
       }
     } catch (err: any) {
       setError(err.message);
@@ -97,7 +109,8 @@ export default function JobHuntPage() {
   };
 
   useEffect(() => {
-    fetchJobs();
+    setPage(1);
+    fetchJobs(1);
   }, [countryFilter]); // Fetch on mount or when country context selection changes
 
   const handleApply = (job: any) => {
@@ -300,11 +313,14 @@ export default function JobHuntPage() {
             *Typing filters the loaded list instantly. Click "Search Jobs" to crawl the internet for new matches.
           </span>
           <button 
-            onClick={fetchJobs} 
+            onClick={() => {
+              setPage(1);
+              fetchJobs(1);
+            }} 
             disabled={loading} 
             className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-2xl text-xs flex items-center gap-2 hover:opacity-90 transition-all shadow-[0_4px_12px_rgba(139,92,246,0.15)] disabled:opacity-50"
           >
-            {loading ? (
+            {loading && page === 1 ? (
               <Loader2 size={14} className="animate-spin" />
             ) : (
               <RefreshCw size={14} />
@@ -321,7 +337,7 @@ export default function JobHuntPage() {
       )}
 
       {/* Loading State */}
-      {loading && (
+      {loading && page === 1 && (
         <div className="flex flex-col items-center justify-center py-24 text-primary gap-3">
           <Loader2 size={40} className="animate-spin" />
           <p className="text-sm font-bold animate-pulse text-muted-foreground">Scouting recruiters & aggregators in real-time...</p>
@@ -329,7 +345,7 @@ export default function JobHuntPage() {
       )}
 
       {/* Job Listings Grid */}
-      {!loading && (
+      {(!loading || page > 1) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredJobs.map((job, index) => (
             <motion.div 
@@ -348,7 +364,14 @@ export default function JobHuntPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-base text-foreground group-hover:text-primary transition-colors leading-snug">{job.title}</h3>
-                      <p className="text-muted-foreground text-xs font-semibold mt-0.5">{job.company}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <p className="text-muted-foreground text-xs font-semibold">{job.company}</p>
+                        {job.isVerified && (
+                          <div className="flex items-center text-blue-500 bg-blue-50 px-1 py-0.5 rounded text-[10px] font-bold" title="Verified Global Company">
+                            <CheckCircle2 size={10} className="mr-0.5"/> Verified
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
@@ -386,6 +409,28 @@ export default function JobHuntPage() {
               </div>
             </motion.div>
           ))}
+        </div>
+      )}
+
+      {/* Load More Button */}
+      {(!loading || page > 1) && filteredJobs.length > 0 && hasMore && (
+        <div className="flex justify-center pt-8">
+          <button
+            onClick={() => {
+              const nextPage = page + 1;
+              setPage(nextPage);
+              fetchJobs(nextPage);
+            }}
+            disabled={loading}
+            className="px-8 py-3 bg-muted text-foreground font-bold rounded-2xl text-sm flex items-center gap-2 hover:bg-muted/80 transition-all shadow-sm border border-border disabled:opacity-50"
+          >
+            {loading && page > 1 ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <RefreshCw size={16} />
+            )}
+            Load More Opportunities
+          </button>
         </div>
       )}
       

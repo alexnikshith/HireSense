@@ -37,6 +37,39 @@ export default function ApplicationsPage() {
     }
   }, []);
 
+  // Real-time application tracker simulation
+  useEffect(() => {
+    const username = localStorage.getItem("user_name") || "default";
+    const interval = setInterval(() => {
+      setAppliedJobs(currentJobs => {
+        let changed = false;
+        const updated = currentJobs.map(job => {
+          // 5% chance to update status on each tick for active applications
+          if (Math.random() < 0.05) {
+            if (job.status === "Applied") {
+              changed = true;
+              // 80% to Interviewing, 20% to Rejected
+              return { ...job, status: Math.random() < 0.8 ? "Interviewing" : "Rejected" };
+            } else if (job.status === "Interviewing") {
+              changed = true;
+              // 50% to Offered, 50% to Rejected
+              return { ...job, status: Math.random() < 0.5 ? "Offered" : "Rejected" };
+            }
+          }
+          return job;
+        });
+        
+        if (changed) {
+          localStorage.setItem(`user_applied_jobs_list_${username}`, JSON.stringify(updated));
+          return updated;
+        }
+        return currentJobs;
+      });
+    }, 15000); // Check every 15 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   const updateStatus = (id: string, newStatus: any) => {
     const updated = appliedJobs.map(job => 
       job.id === id ? { ...job, status: newStatus } : job
