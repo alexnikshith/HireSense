@@ -5,7 +5,7 @@
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-green?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
-> **TalentScope AI** (formerly *HireSense*) is a premium, state-of-the-art AI-powered Resume Intelligence SaaS Platform designed for modern candidates. It delivers instantaneous, recruiter-level feedback, multi-dimensional ATS (Applicant Tracking System) scoring, deep semantic job matching, dynamic learning roadmaps, interactive bullet-point optimization, global job tracking CRM, and seamless Sandbox payment models.
+> **TalentScope AI** (formerly *Talent Scope*) is a premium, state-of-the-art AI-powered Resume Intelligence SaaS Platform designed for modern candidates. It delivers instantaneous, recruiter-level feedback, multi-dimensional ATS (Applicant Tracking System) scoring, deep semantic job matching, dynamic learning roadmaps, interactive bullet-point optimization, global job tracking CRM, and seamless Sandbox payment models.
 
 🔗 **Live Platform URL:** [https://talentscopeai.vercel.app/](https://talentscopeai.vercel.app/) *(Checkout sandbox simulation is fully enabled)*
 
