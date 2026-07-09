@@ -464,8 +464,9 @@ async def google_login(request: Request):
         
     redirect_uri = "http://localhost:8000/api/auth/google/callback"
     if os.environ.get("VERCEL"):
-        # For production
-        redirect_uri = "https://" + request.headers.get("host", "") + "/api/auth/google/callback"
+        # For production, use x-forwarded-host if available to get the true domain
+        host = request.headers.get("x-forwarded-host", request.headers.get("host", ""))
+        redirect_uri = "https://" + host + "/api/auth/google/callback"
         
     scope = "openid email profile https://www.googleapis.com/auth/gmail.readonly"
     
@@ -491,7 +492,8 @@ async def google_callback(request: Request, code: str = None, error: str = None)
     
     redirect_uri = "http://localhost:8000/api/auth/google/callback"
     if os.environ.get("VERCEL"):
-        redirect_uri = "https://" + request.headers.get("host", "") + "/api/auth/google/callback"
+        host = request.headers.get("x-forwarded-host", request.headers.get("host", ""))
+        redirect_uri = "https://" + host + "/api/auth/google/callback"
         
     token_url = "https://oauth2.googleapis.com/token"
     data = {
@@ -550,7 +552,11 @@ async def google_callback(request: Request, code: str = None, error: str = None)
         )
         
         # Redirect to frontend with query params to set local storage
-        frontend_url = "http://localhost:3000" if not os.environ.get("VERCEL") else "https://" + request.headers.get("host", "").replace("api.", "")
+        if os.environ.get("VERCEL"):
+            frontend_host = request.headers.get("x-forwarded-host", request.headers.get("host", ""))
+            frontend_url = "https://" + frontend_host.replace("api.", "")
+        else:
+            frontend_url = "http://localhost:3000"
         return RedirectResponse(f"{frontend_url}/login?googleAuth=true&username={urllib.parse.quote(username)}&email={urllib.parse.quote(email)}")
 
 
