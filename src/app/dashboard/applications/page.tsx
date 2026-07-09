@@ -22,14 +22,7 @@ export default function ApplicationsPage() {
   const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Email Integration States
-  const [showEmailModal, setShowEmailModal] = useState(false);
-  const [emailAddress, setEmailAddress] = useState("");
-  const [appPassword, setAppPassword] = useState("");
-  const [isConnecting, setIsConnecting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [emailSuccess, setEmailSuccess] = useState("");
 
   useEffect(() => {
     const username = localStorage.getItem("user_name") || "default";
@@ -73,36 +66,9 @@ export default function ApplicationsPage() {
     }
   };
 
-  const handleConnectEmail = async () => {
-    setIsConnecting(true);
-    setEmailError("");
-    setEmailSuccess("");
-    
-    try {
-      const username = localStorage.getItem("user_name") || "default";
-      const baseUrl = process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "";
-      
-      const res = await fetch(`${baseUrl}/api/email/connect`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username,
-          email_address: emailAddress,
-          app_password: appPassword,
-          imap_server: "imap.gmail.com"
-        }),
-      });
-      
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Failed to connect email");
-      
-      setEmailSuccess(data.message);
-      setTimeout(() => setShowEmailModal(false), 2000);
-    } catch (err: any) {
-      setEmailError(err.message);
-    } finally {
-      setIsConnecting(false);
-    }
+  const handleConnectGoogle = () => {
+    const baseUrl = process.env.NODE_ENV === "development" ? "http://localhost:8000" : "";
+    window.location.href = `${baseUrl}/api/auth/google/login`;
   };
 
   const handleSyncEmails = async () => {
@@ -126,9 +92,9 @@ export default function ApplicationsPage() {
       
       const data = await res.json();
       if (!res.ok) {
-        if (res.status === 404) {
-          alert("Please connect your email account first.");
-          setShowEmailModal(true);
+        if (res.status === 404 || res.status === 401) {
+          alert("Please connect your Google Account first.");
+          handleConnectGoogle();
           return;
         }
         throw new Error(data.detail || "Failed to sync emails");
@@ -185,10 +151,10 @@ export default function ApplicationsPage() {
         </div>
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setShowEmailModal(true)}
+            onClick={handleConnectGoogle}
             className="px-4 py-2 bg-muted text-foreground text-xs font-bold rounded-xl border border-border hover:bg-muted/80 transition-all flex items-center gap-2 shadow-sm"
           >
-            <Mail size={14} /> Connect Email
+            <Mail size={14} /> Connect Google Account
           </button>
           <button 
             onClick={handleSyncEmails}
@@ -342,72 +308,7 @@ export default function ApplicationsPage() {
         </div>
       </div>
 
-      {/* Email Connect Modal */}
-      <AnimatePresence>
-        {showEmailModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white border border-border p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full relative"
-            >
-              <button 
-                onClick={() => setShowEmailModal(false)}
-                className="absolute top-6 right-6 text-muted-foreground hover:text-foreground"
-              >
-                <XCircle size={24} />
-              </button>
-              
-              <div className="flex items-center justify-center w-16 h-16 bg-primary/10 text-primary rounded-2xl mb-6">
-                <Mail size={32} />
-              </div>
-              
-              <h2 className="text-2xl font-bold text-foreground mb-2">Connect Email</h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                Connect your Gmail using an App Password to automatically sync application statuses from recruiters.
-              </p>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-foreground mb-1.5 uppercase tracking-wide">Gmail Address</label>
-                  <input 
-                    type="email" 
-                    value={emailAddress}
-                    onChange={(e) => setEmailAddress(e.target.value)}
-                    placeholder="you@gmail.com"
-                    className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-foreground mb-1.5 uppercase tracking-wide flex justify-between items-center">
-                    <span>App Password</span>
-                    <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer" className="text-primary hover:underline lowercase normal-case">How to get this?</a>
-                  </label>
-                  <input 
-                    type="password" 
-                    value={appPassword}
-                    onChange={(e) => setAppPassword(e.target.value)}
-                    placeholder="16-character app password"
-                    className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all font-mono"
-                  />
-                </div>
-                
-                {emailError && <div className="p-3 bg-red-50 text-red-600 text-xs rounded-xl border border-red-200">{emailError}</div>}
-                {emailSuccess && <div className="p-3 bg-green-50 text-green-700 text-xs rounded-xl border border-green-200 flex items-center gap-2"><CheckCircle2 size={16}/> {emailSuccess}</div>}
-                
-                <button 
-                  onClick={handleConnectEmail}
-                  disabled={isConnecting || !emailAddress || !appPassword}
-                  className="w-full py-3 mt-4 bg-primary text-primary-foreground font-bold rounded-xl text-sm hover:opacity-90 transition-all flex justify-center items-center gap-2 shadow-[0_4px_12px_rgba(139,92,246,0.15)] disabled:opacity-50"
-                >
-                  {isConnecting ? <Loader2 size={18} className="animate-spin" /> : "Securely Connect"}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+
     </div>
   );
 }

@@ -93,6 +93,14 @@ def init_db():
             imap_server TEXT DEFAULT 'imap.gmail.com'
         )
     """)
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS oauth_tokens (
+            username TEXT PRIMARY KEY,
+            access_token TEXT,
+            refresh_token TEXT,
+            expires_at INTEGER
+        )
+    """)
     # Seed default user if not exists
     user = db.fetchone("SELECT 1 FROM users WHERE username = ?", ("nikshith",))
     if not user:
@@ -440,67 +448,159 @@ class EmailSyncRequest(BaseModel):
     username: str
     tracked_companies: list[str]  # e.g. ["Google", "Microsoft", "Stripe"]
 
+from fastapi.responses import RedirectResponse
+import urllib.parse
+import time
+from fastapi import Request
+
+@app.get("/api/auth/google/login")
+async def google_login(request: Request):
+    client_id = os.environ.get("GOOGLE_CLIENT_ID")
+    if not client_id:
+        raise HTTPException(status_code=500, detail="Google OAuth not configured on server")
+        
+    redirect_uri = "http://localhost:8000/api/auth/google/callback"
+    if os.environ.get("VERCEL"):
+        # For production
+        redirect_uri = "https://" + request.headers.get("host", "") + "/api/auth/google/callback"
+        
+    scope = "openid email profile https://www.googleapis.com/auth/gmail.readonly"
+    
+    url = "https://accounts.google.com/o/oauth2/v2/auth"
+    params = {
+        "client_id": client_id.strip(),
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": scope,
+        "access_type": "offline",
+        "prompt": "consent"
+    }
+    query_string = urllib.parse.urlencode(params)
+    return RedirectResponse(f"{url}?{query_string}")
+
+@app.get("/api/auth/google/callback")
+async def google_callback(request: Request, code: str = None, error: str = None):
+    if error:
+        return RedirectResponse(f"http://localhost:3000/login?error={urllib.parse.quote(error)}")
+        
+    client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+    client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+    
+    redirect_uri = "http://localhost:8000/api/auth/google/callback"
+    if os.environ.get("VERCEL"):
+        redirect_uri = "https://" + request.headers.get("host", "") + "/api/auth/google/callback"
+        
+    token_url = "https://oauth2.googleapis.com/token"
+    data = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "code": code,
+        "grant_type": "authorization_code",
+        "redirect_uri": redirect_uri
+    }
+    
+    async with httpx.AsyncClient() as client:
+        token_res = await client.post(token_url, data=data)
+        if token_res.status_code != 200:
+            return RedirectResponse(f"http://localhost:3000/login?error={urllib.parse.quote('Failed to obtain token from Google')}")
+            
+        token_data = token_res.json()
+        access_token = token_data.get("access_token")
+        refresh_token = token_data.get("refresh_token")
+        expires_in = token_data.get("expires_in", 3600)
+        expires_at = int(time.time()) + expires_in
+        
+        # Get user profile
+        user_info_res = await client.get("https://www.googleapis.com/oauth2/v2/userinfo", headers={"Authorization": f"Bearer {access_token}"})
+        if user_info_res.status_code != 200:
+            return RedirectResponse(f"http://localhost:3000/login?error={urllib.parse.quote('Failed to fetch user info from Google')}")
+            
+        user_info = user_info_res.json()
+        email = user_info.get("email", "").lower()
+        # Generate a username if none exists, just using email prefix
+        username = email.split('@')[0] if email else "google_user"
+        
+        # Check if user exists
+        existing_user = db.fetchone("SELECT username FROM users WHERE email = ?", (email,))
+        if existing_user:
+            username = existing_user[0]
+        else:
+            # Create user
+            # Avoid username collisions
+            test_username = username
+            counter = 1
+            while db.fetchone("SELECT 1 FROM users WHERE username = ?", (test_username,)):
+                test_username = f"{username}{counter}"
+                counter += 1
+            username = test_username
+            db.execute(
+                "INSERT INTO users (username, email, password, credits, active_plan) VALUES (?, ?, ?, ?, ?)",
+                (username, email, "", 400, "free")
+            )
+            
+        # Store OAuth tokens
+        db.execute(
+            "INSERT INTO oauth_tokens (username, access_token, refresh_token, expires_at) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(username) DO UPDATE SET access_token=excluded.access_token, "
+            "refresh_token=COALESCE(excluded.refresh_token, oauth_tokens.refresh_token), expires_at=excluded.expires_at",
+            (username, access_token, refresh_token, expires_at)
+        )
+        
+        # Redirect to frontend with query params to set local storage
+        frontend_url = "http://localhost:3000" if not os.environ.get("VERCEL") else "https://" + request.headers.get("host", "").replace("api.", "")
+        return RedirectResponse(f"{frontend_url}/login?googleAuth=true&username={urllib.parse.quote(username)}&email={urllib.parse.quote(email)}")
+
+
 @app.post("/api/email/sync")
 async def email_sync(req: EmailSyncRequest):
-    import imaplib
-    import email
-    from email.header import decode_header
     import datetime
     
-    creds = db.fetchone("SELECT email_address, app_password, imap_server FROM email_credentials WHERE username = ?", (req.username,))
-    if not creds:
-        raise HTTPException(status_code=404, detail="Email not connected.")
-        
-    email_address, app_password, imap_server = creds
+    # 1. First, check if they connected via Google OAuth
+    oauth = db.fetchone("SELECT access_token, refresh_token, expires_at FROM oauth_tokens WHERE username = ?", (req.username,))
     
-    updates = []
-    
-    try:
-        mail = imaplib.IMAP4_SSL(imap_server)
-        mail.login(email_address, app_password)
-        mail.select("inbox")
+    if oauth:
+        access_token, refresh_token, expires_at = oauth
         
-        # Search for emails in the last 14 days
-        date_limit = (datetime.date.today() - datetime.timedelta(days=14)).strftime("%d-%b-%Y")
-        status, messages = mail.search(None, f'(SINCE "{date_limit}")')
+        # Refresh token if expired
+        if int(time.time()) > expires_at - 300 and refresh_token:
+            client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+            client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+            async with httpx.AsyncClient() as client:
+                refresh_res = await client.post("https://oauth2.googleapis.com/token", data={
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "refresh_token": refresh_token,
+                    "grant_type": "refresh_token"
+                })
+                if refresh_res.status_code == 200:
+                    r_data = refresh_res.json()
+                    access_token = r_data.get("access_token")
+                    expires_at = int(time.time()) + r_data.get("expires_in", 3600)
+                    db.execute("UPDATE oauth_tokens SET access_token = ?, expires_at = ? WHERE username = ?", (access_token, expires_at, req.username))
         
-        if status == "OK" and messages[0]:
-            email_ids = messages[0].split()
-            # To avoid parsing too many emails, limit to last 20
-            email_ids = email_ids[-20:]
+        updates = []
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {access_token}"}
+            # Search Gmail for last 14 days
+            date_limit = (datetime.date.today() - datetime.timedelta(days=14)).strftime("%Y/%m/%d")
+            query = f"after:{date_limit}"
             
-            for eid in email_ids:
-                res, msg_data = mail.fetch(eid, "(RFC822)")
-                for response_part in msg_data:
-                    if isinstance(response_part, tuple):
-                        msg = email.message_from_bytes(response_part[1])
+            res = await client.get("https://gmail.googleapis.com/gmail/v1/users/me/messages", params={"q": query, "maxResults": 20}, headers=headers)
+            if res.status_code == 200:
+                messages = res.json().get("messages", [])
+                for m in messages:
+                    msg_res = await client.get(f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{m['id']}", params={"format": "metadata", "metadataHeaders": ["Subject", "From"]}, headers=headers)
+                    if msg_res.status_code == 200:
+                        msg_data = msg_res.json()
+                        snippet = msg_data.get("snippet", "").lower()
+                        headers = msg_data.get("payload", {}).get("headers", [])
+                        subject = next((h["value"] for h in headers if h["name"] == "Subject"), "").lower()
+                        from_header = next((h["value"] for h in headers if h["name"] == "From"), "").lower()
                         
-                        subject, encoding = decode_header(msg["Subject"])[0]
-                        if isinstance(subject, bytes):
-                            subject = subject.decode(encoding if encoding else "utf-8", errors="ignore")
-                            
-                        from_header = msg.get("From", "")
+                        text_to_search = f"{subject} {snippet} {from_header}"
                         
-                        # Get body text
-                        body = ""
-                        if msg.is_multipart():
-                            for part in msg.walk():
-                                if part.get_content_type() == "text/plain":
-                                    body_bytes = part.get_payload(decode=True)
-                                    if body_bytes:
-                                        body = body_bytes.decode(errors="ignore")
-                                        break
-                        else:
-                            body_bytes = msg.get_payload(decode=True)
-                            if body_bytes:
-                                body = body_bytes.decode(errors="ignore")
-                                
-                        text_to_search = (subject + " " + body).lower()
-                        
-                        # Check against tracked companies
                         for company in req.tracked_companies:
-                            if company.lower() in text_to_search or company.lower() in from_header.lower():
-                                # Simple NLP parsing logic for status
+                            if company.lower() in text_to_search:
                                 new_status = None
                                 if any(word in text_to_search for word in ["offer", "congratulations", "welcome to"]):
                                     new_status = "Offered"
@@ -510,19 +610,96 @@ async def email_sync(req: EmailSyncRequest):
                                     new_status = "Rejected"
                                     
                                 if new_status:
-                                    # We keep the highest update found for a company
                                     existing = next((u for u in updates if u["company"] == company), None)
                                     if not existing:
                                         updates.append({"company": company, "new_status": new_status})
                                     else:
-                                        # Only upgrade status in priority sequence if needed, but for simplicity, we just keep the latest we parse.
                                         existing["new_status"] = new_status
+                return {"status": "success", "updates": updates, "method": "gmail_api"}
+            else:
+                # If Gmail API fails, it might mean the token is fully invalid, we should throw error
+                raise HTTPException(status_code=401, detail="Google authentication expired. Please reconnect your account.")
+    
+    # 2. Fallback to IMAP if they connected via App Passwords previously
+    creds = db.fetchone("SELECT email_address, app_password, imap_server FROM email_credentials WHERE username = ?", (req.username,))
+    if creds:
+        import imaplib
+        import email
+        from email.header import decode_header
+        
+        email_address, app_password, imap_server = creds
+        updates = []
+        try:
+            mail = imaplib.IMAP4_SSL(imap_server)
+            mail.login(email_address, app_password)
+            mail.select("inbox")
+            
+            # Search for emails in the last 14 days
+            date_limit = (datetime.date.today() - datetime.timedelta(days=14)).strftime("%d-%b-%Y")
+            status, messages = mail.search(None, f'(SINCE "{date_limit}")')
+            
+            if status == "OK" and messages[0]:
+                email_ids = messages[0].split()
+                # To avoid parsing too many emails, limit to last 20
+                email_ids = email_ids[-20:]
+                
+                for eid in email_ids:
+                    res, msg_data = mail.fetch(eid, "(RFC822)")
+                    for response_part in msg_data:
+                        if isinstance(response_part, tuple):
+                            msg = email.message_from_bytes(response_part[1])
+                            
+                            subject, encoding = decode_header(msg["Subject"])[0]
+                            if isinstance(subject, bytes):
+                                subject = subject.decode(encoding if encoding else "utf-8", errors="ignore")
                                 
-        mail.close()
-        mail.logout()
-        return {"status": "success", "updates": updates}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error syncing emails: {str(e)}")
+                            from_header = msg.get("From", "")
+                            
+                            # Get body text
+                            body = ""
+                            if msg.is_multipart():
+                                for part in msg.walk():
+                                    if part.get_content_type() == "text/plain":
+                                        body_bytes = part.get_payload(decode=True)
+                                        if body_bytes:
+                                            body = body_bytes.decode(errors="ignore")
+                                            break
+                            else:
+                                body_bytes = msg.get_payload(decode=True)
+                                if body_bytes:
+                                    body = body_bytes.decode(errors="ignore")
+                                    
+                            text_to_search = (subject + " " + body).lower()
+                            
+                            # Check against tracked companies
+                            for company in req.tracked_companies:
+                                if company.lower() in text_to_search or company.lower() in from_header.lower():
+                                    # Simple NLP parsing logic for status
+                                    new_status = None
+                                    if any(word in text_to_search for word in ["offer", "congratulations", "welcome to"]):
+                                        new_status = "Offered"
+                                    elif any(word in text_to_search for word in ["interview", "schedule", "next steps", "availability", "chat"]):
+                                        new_status = "Interviewing"
+                                    elif any(word in text_to_search for word in ["unfortunately", "not moving forward", "other candidates", "regret", "decided to proceed"]):
+                                        new_status = "Rejected"
+                                        
+                                    if new_status:
+                                        # We keep the highest update found for a company
+                                        existing = next((u for u in updates if u["company"] == company), None)
+                                        if not existing:
+                                            updates.append({"company": company, "new_status": new_status})
+                                        else:
+                                            # Only upgrade status in priority sequence if needed, but for simplicity, we just keep the latest we parse.
+                                            existing["new_status"] = new_status
+                                    
+            mail.close()
+            mail.logout()
+            return {"status": "success", "updates": updates, "method": "imap"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error syncing via IMAP: {str(e)}")
+
+    # If neither method exists
+    raise HTTPException(status_code=404, detail="Email not connected. Please Sign in with Google or connect via App Password.")
 
 
 if __name__ == "__main__":
