@@ -42,8 +42,10 @@
 *   **Skill Match Indicator**: Automatically estimates a skill match score (70% - 99%) against the active candidate baseline to highlight high-probability fits.
 *   **Instant Redirection & Application logging**: Direct deep-links to official job applications and logs entries directly into the candidate CRM tracker.
 
-### 4. 🗃️ Applications CRM Tracker
+### 4. 🗃️ Applications CRM Tracker & Gmail Sync
 *   **End-to-End Funnel Tracker**: Organized Kanban dashboard grouping applications into four key stages: `Applied`, `Interviewing`, `Offered`, and `Rejected`.
+*   **Google OAuth Integration**: Securely connect your Google account to automatically track application statuses.
+*   **Real-time Email Sync**: Scans your inbox for emails from tracked companies and automatically moves applications to "Interviewing", "Offered", or "Rejected" without manual input.
 *   **Dynamic Visual Metrics**: Aggregates real-time KPIs to show total conversion rates across the candidate job funnel.
 *   **Status Management & Auditing**: Inline status toggles, deletion options, and original application reference links.
 
