@@ -1,5 +1,8 @@
 import os
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Ensure the 'api' directory is in the path for module discovery
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

@@ -29,7 +29,7 @@ export default function TermsOfService() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">4. Intellectual Property</h2>
-          <p>The Service and its original content, features, and functionality are and will remain the exclusive property of HireSense and its licensors. The Service is protected by copyright, trademark, and other laws.</p>
+          <p>The Service and its original content, features, and functionality are and will remain the exclusive property of Talent Scope and its licensors. The Service is protected by copyright, trademark, and other laws.</p>
         </section>
 
         <section>

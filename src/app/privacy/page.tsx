@@ -14,7 +14,7 @@ export default function PrivacyPolicy() {
       <div className="space-y-6 text-sm leading-relaxed">
         <section>
           <h2 className="text-xl font-semibold mb-3">1. Introduction</h2>
-          <p>Welcome to HireSense ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us.</p>
+          <p>Welcome to Talent Scope ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us.</p>
         </section>
 
         <section>
