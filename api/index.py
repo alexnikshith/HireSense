@@ -484,80 +484,82 @@ async def google_login(request: Request):
 
 @app.get("/api/auth/google/callback")
 async def google_callback(request: Request, code: str = None, error: str = None):
-    if error:
-        return RedirectResponse(f"http://localhost:3000/login?error={urllib.parse.quote(error)}")
-        
-    client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
-    client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
-    
-    redirect_uri = "http://localhost:8000/api/auth/google/callback"
-    if os.environ.get("VERCEL"):
-        host = request.headers.get("x-forwarded-host", request.headers.get("host", ""))
-        redirect_uri = "https://" + host + "/api/auth/google/callback"
-        
-    token_url = "https://oauth2.googleapis.com/token"
-    data = {
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "code": code,
-        "grant_type": "authorization_code",
-        "redirect_uri": redirect_uri
-    }
-    
-    async with httpx.AsyncClient() as client:
-        token_res = await client.post(token_url, data=data)
-        if token_res.status_code != 200:
-            return RedirectResponse(f"http://localhost:3000/login?error={urllib.parse.quote('Failed to obtain token from Google')}")
-            
-        token_data = token_res.json()
-        access_token = token_data.get("access_token")
-        refresh_token = token_data.get("refresh_token")
-        expires_in = token_data.get("expires_in", 3600)
-        expires_at = int(time.time()) + expires_in
-        
-        # Get user profile
-        user_info_res = await client.get("https://www.googleapis.com/oauth2/v2/userinfo", headers={"Authorization": f"Bearer {access_token}"})
-        if user_info_res.status_code != 200:
-            return RedirectResponse(f"http://localhost:3000/login?error={urllib.parse.quote('Failed to fetch user info from Google')}")
-            
-        user_info = user_info_res.json()
-        email = user_info.get("email", "").lower()
-        # Generate a username if none exists, just using email prefix
-        username = email.split('@')[0] if email else "google_user"
-        
-        # Check if user exists
-        existing_user = db.fetchone("SELECT username FROM users WHERE email = ?", (email,))
-        if existing_user:
-            username = existing_user[0]
-        else:
-            # Create user
-            # Avoid username collisions
-            test_username = username
-            counter = 1
-            while db.fetchone("SELECT 1 FROM users WHERE username = ?", (test_username,)):
-                test_username = f"{username}{counter}"
-                counter += 1
-            username = test_username
-            db.execute(
-                "INSERT INTO users (username, email, password, credits, active_plan) VALUES (?, ?, ?, ?, ?)",
-                (username, email, "", 400, "free")
-            )
-            
-        # Store OAuth tokens
-        db.execute(
-            "INSERT INTO oauth_tokens (username, access_token, refresh_token, expires_at) VALUES (?, ?, ?, ?) "
-            "ON CONFLICT(username) DO UPDATE SET access_token=excluded.access_token, "
-            "refresh_token=COALESCE(excluded.refresh_token, oauth_tokens.refresh_token), expires_at=excluded.expires_at",
-            (username, access_token, refresh_token, expires_at)
-        )
-        
-        # Redirect to frontend with query params to set local storage
+    try:
         if os.environ.get("VERCEL"):
             frontend_host = request.headers.get("x-forwarded-host", request.headers.get("host", ""))
             frontend_url = "https://" + frontend_host.replace("api.", "")
         else:
             frontend_url = "http://localhost:3000"
-        return RedirectResponse(f"{frontend_url}/login?googleAuth=true&username={urllib.parse.quote(username)}&email={urllib.parse.quote(email)}")
+
+        if error:
+            return RedirectResponse(f"{frontend_url}/login?error={urllib.parse.quote(error)}")
+            
+        client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+        client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+        
+        redirect_uri = "http://localhost:8000/api/auth/google/callback"
+        if os.environ.get("VERCEL"):
+            host = request.headers.get("x-forwarded-host", request.headers.get("host", ""))
+            redirect_uri = "https://" + host + "/api/auth/google/callback"
+            
+        token_url = "https://oauth2.googleapis.com/token"
+        data = {
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": redirect_uri
+        }
+        
+        async with httpx.AsyncClient() as client:
+            token_res = await client.post(token_url, data=data)
+            if token_res.status_code != 200:
+                err_msg = token_res.text
+                return RedirectResponse(f"{frontend_url}/login?error={urllib.parse.quote('Failed to obtain token from Google: ' + err_msg)}")
+                
+            token_data = token_res.json()
+            access_token = token_data.get("access_token")
+            refresh_token = token_data.get("refresh_token")
+            expires_in = token_data.get("expires_in", 3600)
+            expires_at = int(time.time()) + expires_in
+            
+            # Get user profile
+            user_info_res = await client.get("https://www.googleapis.com/oauth2/v2/userinfo", headers={"Authorization": f"Bearer {access_token}"})
+            if user_info_res.status_code != 200:
+                return RedirectResponse(f"{frontend_url}/login?error={urllib.parse.quote('Failed to fetch user info from Google')}")
+                
+            user_info = user_info_res.json()
+            email = user_info.get("email", "").lower()
+            username = email.split('@')[0] if email else "google_user"
+            
+            # Check if user exists
+            existing_user = db.fetchone("SELECT username FROM users WHERE email = ?", (email,))
+            if existing_user:
+                username = existing_user[0]
+            else:
+                test_username = username
+                counter = 1
+                while db.fetchone("SELECT 1 FROM users WHERE username = ?", (test_username,)):
+                    test_username = f"{username}{counter}"
+                    counter += 1
+                username = test_username
+                db.execute(
+                    "INSERT INTO users (username, email, password, credits, active_plan) VALUES (?, ?, ?, ?, ?)",
+                    (username, email, "", 400, "free")
+                )
+                
+            # Store OAuth tokens
+            db.execute(
+                "INSERT INTO oauth_tokens (username, access_token, refresh_token, expires_at) VALUES (?, ?, ?, ?) "
+                "ON CONFLICT(username) DO UPDATE SET access_token=excluded.access_token, "
+                "refresh_token=COALESCE(excluded.refresh_token, oauth_tokens.refresh_token), expires_at=excluded.expires_at",
+                (username, access_token, refresh_token, expires_at)
+            )
+            
+            return RedirectResponse(f"{frontend_url}/login?googleAuth=true&username={urllib.parse.quote(username)}&email={urllib.parse.quote(email)}")
+    except Exception as e:
+        import traceback
+        return {"error": "Internal Server Error", "details": str(e), "trace": traceback.format_exc()}
 
 
 @app.post("/api/email/sync")
