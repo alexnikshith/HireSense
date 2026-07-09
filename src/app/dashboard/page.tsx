@@ -81,7 +81,11 @@ export default function DashboardPage() {
       return;
     }
 
-    // Credits consumption removed for AI Analysis
+    const currentCredits = parseInt(localStorage.getItem("user_credits") || "400");
+    if (currentCredits < 50) {
+      setError("Not enough credits to run analysis. Please subscribe in your Profile to get more credits.");
+      return;
+    }
     
     setError(null);
     setLoading(true);
@@ -109,7 +113,24 @@ export default function DashboardPage() {
 
       if (!res.ok) throw new Error(data.detail || "Analysis failed");
       
-      // (Credits deduction removed)
+      // Deduct credits on success
+      const newCredits = currentCredits - 50;
+      localStorage.setItem("user_credits", newCredits.toString());
+      window.dispatchEvent(new Event("credits_updated"));
+
+      // Sync with backend database
+      try {
+        const username = localStorage.getItem("user_name") || "nikshith";
+        const plan = localStorage.getItem("active_plan") || "free";
+        const baseUrl = process.env.NODE_ENV === "development" ? "http://localhost:8000" : "";
+        fetch(`${baseUrl}/api/auth/update`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, credits: newCredits, active_plan: plan }),
+        });
+      } catch (e) {
+        console.error("Failed to sync credits with backend:", e);
+      }
 
       setResult(data);
       localStorage.setItem("last_analysis_result", JSON.stringify(data));
