@@ -24,7 +24,7 @@ class ResumeParser:
                 "formatting_issues": formatting,
                 "page_count": 1,
                 "word_count": word_count,
-                "has_tables": "  " in clean_text or "\t" in clean_text,
+                "has_tables": "\t" in clean_text,
                 "has_images": False # Hard to detect with text-only extraction
             }
         except Exception as e:

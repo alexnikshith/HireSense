@@ -92,10 +92,12 @@ class ATSScorer:
     # ------------------------------------------------------------------ #
 
     def _score_keyword_relevance(self, match_data: dict) -> float:
-        """Combine match score and keyword density."""
-        ms = match_data.get("match_score", 0)        # 0-100
+        """Score based purely on keyword density (intersection of JD skills), with a slight curve."""
         density = match_data.get("keyword_density", 0)  # 0-1
-        return min(ms * 0.7 + density * 100 * 0.3, 100)
+        
+        # A density of 70% or more JD keywords is considered an excellent match for ATS
+        # So we multiply by 1.4 to curve it properly (e.g. 70% density = ~98/100 score)
+        return min(density * 100 * 1.4, 100)
 
     def _score_sections(self, sections: dict) -> tuple[float, dict]:
         """Score completeness and return per-section feedback."""
