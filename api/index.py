@@ -85,6 +85,14 @@ def init_db():
             active_plan TEXT DEFAULT 'free'
         )
     """)
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS email_credentials (
+            username TEXT PRIMARY KEY,
+            email_address TEXT,
+            app_password TEXT,
+            imap_server TEXT DEFAULT 'imap.gmail.com'
+        )
+    """)
     # Seed default user if not exists
     user = db.fetchone("SELECT 1 FROM users WHERE username = ?", ("nikshith",))
     if not user:
@@ -400,6 +408,121 @@ async def optimize_bullets(request: OptimizeBulletsRequest):
         })
         
     return {"optimized": optimized}
+
+class EmailConnectRequest(BaseModel):
+    username: str
+    email_address: str
+    app_password: str
+    imap_server: str = "imap.gmail.com"
+
+@app.post("/api/email/connect")
+async def email_connect(req: EmailConnectRequest):
+    import imaplib
+    try:
+        # Test IMAP connection
+        mail = imaplib.IMAP4_SSL(req.imap_server)
+        mail.login(req.email_address, req.app_password)
+        mail.logout()
+        
+        # Connection successful, save credentials
+        db.execute(
+            "INSERT INTO email_credentials (username, email_address, app_password, imap_server) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(username) DO UPDATE SET email_address=excluded.email_address, app_password=excluded.app_password, imap_server=excluded.imap_server",
+            (req.username, req.email_address, req.app_password, req.imap_server)
+        )
+        return {"status": "success", "message": "Email connected successfully."}
+    except imaplib.IMAP4.error as e:
+        raise HTTPException(status_code=401, detail=f"Authentication failed. Please check your App Password. Error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"IMAP connection failed. Error: {str(e)}")
+
+class EmailSyncRequest(BaseModel):
+    username: str
+    tracked_companies: list[str]  # e.g. ["Google", "Microsoft", "Stripe"]
+
+@app.post("/api/email/sync")
+async def email_sync(req: EmailSyncRequest):
+    import imaplib
+    import email
+    from email.header import decode_header
+    import datetime
+    
+    creds = db.fetchone("SELECT email_address, app_password, imap_server FROM email_credentials WHERE username = ?", (req.username,))
+    if not creds:
+        raise HTTPException(status_code=404, detail="Email not connected.")
+        
+    email_address, app_password, imap_server = creds
+    
+    updates = []
+    
+    try:
+        mail = imaplib.IMAP4_SSL(imap_server)
+        mail.login(email_address, app_password)
+        mail.select("inbox")
+        
+        # Search for emails in the last 14 days
+        date_limit = (datetime.date.today() - datetime.timedelta(days=14)).strftime("%d-%b-%Y")
+        status, messages = mail.search(None, f'(SINCE "{date_limit}")')
+        
+        if status == "OK" and messages[0]:
+            email_ids = messages[0].split()
+            # To avoid parsing too many emails, limit to last 20
+            email_ids = email_ids[-20:]
+            
+            for eid in email_ids:
+                res, msg_data = mail.fetch(eid, "(RFC822)")
+                for response_part in msg_data:
+                    if isinstance(response_part, tuple):
+                        msg = email.message_from_bytes(response_part[1])
+                        
+                        subject, encoding = decode_header(msg["Subject"])[0]
+                        if isinstance(subject, bytes):
+                            subject = subject.decode(encoding if encoding else "utf-8", errors="ignore")
+                            
+                        from_header = msg.get("From", "")
+                        
+                        # Get body text
+                        body = ""
+                        if msg.is_multipart():
+                            for part in msg.walk():
+                                if part.get_content_type() == "text/plain":
+                                    body_bytes = part.get_payload(decode=True)
+                                    if body_bytes:
+                                        body = body_bytes.decode(errors="ignore")
+                                        break
+                        else:
+                            body_bytes = msg.get_payload(decode=True)
+                            if body_bytes:
+                                body = body_bytes.decode(errors="ignore")
+                                
+                        text_to_search = (subject + " " + body).lower()
+                        
+                        # Check against tracked companies
+                        for company in req.tracked_companies:
+                            if company.lower() in text_to_search or company.lower() in from_header.lower():
+                                # Simple NLP parsing logic for status
+                                new_status = None
+                                if any(word in text_to_search for word in ["offer", "congratulations", "welcome to"]):
+                                    new_status = "Offered"
+                                elif any(word in text_to_search for word in ["interview", "schedule", "next steps", "availability", "chat"]):
+                                    new_status = "Interviewing"
+                                elif any(word in text_to_search for word in ["unfortunately", "not moving forward", "other candidates", "regret", "decided to proceed"]):
+                                    new_status = "Rejected"
+                                    
+                                if new_status:
+                                    # We keep the highest update found for a company
+                                    existing = next((u for u in updates if u["company"] == company), None)
+                                    if not existing:
+                                        updates.append({"company": company, "new_status": new_status})
+                                    else:
+                                        # Only upgrade status in priority sequence if needed, but for simplicity, we just keep the latest we parse.
+                                        existing["new_status"] = new_status
+                                
+        mail.close()
+        mail.logout()
+        return {"status": "success", "updates": updates}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error syncing emails: {str(e)}")
 
 
 if __name__ == "__main__":
